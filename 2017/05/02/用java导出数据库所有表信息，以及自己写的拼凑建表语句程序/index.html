@@ -1,0 +1,1309 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>用java导出数据库所有表信息，以及自己写的拼凑建表语句程序万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://yoursite.com" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>用java导出数据库所有表信息，以及自己写的拼凑建表语句程序</h4>
+    <time datetime="2017-05-02T01:34:20.000Z"><i class="fa fa-clock-o"></i>2017-05-02</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/71077550" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/71077550</a>   </p>
+<p>   由于公司数据库没有进行分库分表，导出上亿数据量时，内存溢出已经解决但是存在速度很慢的问题，在不允许动表情况下还未找到解决办法。</p>
+<pre><code>import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.omg.CORBA.PUBLIC_MEMBER;
+
+import com.f1j.ss.t;
+import com.f1j.util.br;
+import com.lowagie.tools.concat_pdf;
+import com.sinosoft.lis.pubfun.PubFun;
+import com.sinosoft.utility.DBConnPool;
+import com.sinosoft.utility.ExeSQL;
+import com.sinosoft.utility.SSRS;
+
+public class LisTransferBL {
+    private static String path;
+    private final static String[] ss = { &quot;T_POLICY_MAIN&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;,
+            &quot;&quot;, &quot;&quot; };
+    private static List&lt;String&gt; bugschema = new ArrayList&lt;String&gt;();
+    private static Map&lt;String, String&gt; bigschema = new HashMap&lt;String, String&gt;();
+    private static Map&lt;String, String&gt; yearschema = new HashMap&lt;String, String&gt;();
+    private static Map&lt;String, String&gt; caoschema = new HashMap&lt;String, String&gt;();;
+
+    static {
+        // 不能查询的表格
+        String[] s1 = { &quot;RATE121501&quot;, &quot;SUPPRISKSCORE240301&quot;, &quot;MISETLDATE_2&quot;,
+                &quot;SMT&quot;, &quot;TEMPYJ&quot;, &quot;LQGRPCONTDAYDATA&quot;, &quot;LL&quot;, &quot;LDCODE_2&quot;,
+                &quot;RATE646_B&quot;, &quot;RATE646_C&quot;, &quot;TEMPGET&quot;, &quot;STMT_SQL&quot;,
+                &quot;TABLESPACE_TABL&quot;, &quot;CONTROL_TABL&quot;, &quot;CASHVALUE285&quot;,
+                &quot;CASHVALUE237&quot;, &quot;GETFEE330801&quot;, &quot;CASHVALUE284&quot;, &quot;RATE290&quot;,
+                &quot;CASHVALUE290&quot;, &quot;CASHVALUE238&quot;, &quot;CTRATE331501&quot;, &quot;RATE331501&quot;,
+                &quot;GETFEE331501&quot;, &quot;LXUPDATELOG&quot;, &quot;STATSQLCONFIG_2009&quot;,
+                &quot;RATE6601_1&quot;, &quot;RATE6601_0&quot;, &quot;CONTTEST&quot;, &quot;TEMP330501:286707&quot;,
+                &quot;Rate550806&quot;, &quot;PAYTIMES662&quot;, &quot;RATE6623&quot;,
+                &quot;LPEDORESPECIALDATA0520&quot;, &quot;RATE662&quot;, &quot;LDMENU_BAK20090701&quot;,
+                &quot;RISKDEATHRATE331601&quot;, &quot;RATE6622&quot;, &quot;LABANKMISION_S&quot;,
+                &quot;RISKRATE331901&quot;, &quot;FINPREM_YM_TB_01&quot;, &quot;RATE6621&quot;, &quot;POLNO&quot;,
+                &quot;INTFDATATRACE_SH&quot;, &quot;RATE243&quot;, &quot;RATE277&quot;, &quot;CASHVALUE239&quot;,
+                &quot;CASHVALUE240&quot;, &quot;RATE245&quot;, &quot;RATE244&quot;, &quot;TEMPYYL&quot;, &quot;POLNO_2&quot;,
+                &quot;LCGRPEDOR&quot;, &quot;RATE2301&quot;, &quot;RATE2601&quot;, &quot;RATE5201&quot;, &quot;RATE550706&quot;,
+                &quot;RATE550806&quot;, &quot;RE230801&quot;, &quot;RE230901&quot;, &quot;LOBGRPPOSITION&quot;,
+                &quot;RATE6693&quot;, &quot;RATE6692&quot;, &quot;RATE6691&quot;, &quot;LPCERTIFYINSURED&quot;,
+                &quot;CASHVALUE208&quot;, &quot;RATE208&quot;, &quot;CASHVALUE217&quot;, &quot;RATE217&quot;,
+                &quot;LPGRPPOSITION&quot;, &quot;CASHVALUE301&quot;, &quot;CASHVALUE302&quot;,
+                &quot;LBASCRIPTIONRULEFACTORY&quot;, &quot;LPASCRIPTIONRULEFACTORY&quot;,
+                &quot;LOBASCRIPTIONRULEFACTORY&quot;, &quot;LBASCRIPTIONRULEPARAMS&quot;,
+                &quot;LPASCRIPTIONRULEPARAMS&quot;, &quot;LOBASCRIPTIONRULEPARAMS&quot;,
+                &quot;LCGRPFEETOACC&quot;, &quot;LBRISKZTFEE&quot;, &quot;LPRISKZTFEE&quot;, &quot;LOBRISKZTFEE&quot;,
+                &quot;LDDINGHOSPITALB&quot;, &quot;LQGRPPREMDATA&quot;, &quot;LPRREPORTITEM&quot;,
+                &quot;GETFEE332601&quot;, &quot;GETFEE332501&quot;, &quot;CTRATE332501&quot;,
+                &quot;RISKRATE332501&quot;, &quot;RATE304&quot;, &quot;CASHVALUE309&quot;, &quot;RATE309&quot;,
+                &quot;CASHVALUE314&quot;, &quot;RATE314&quot;, &quot;RATE308&quot;, &quot;TESTCONFIG&quot;,
+                &quot;FORMU330501_YEAR&quot;, &quot;CZL_TEST&quot;, &quot;GETFEE332701&quot;, &quot;CTRATE332701&quot;,
+                &quot;LICRMCONTTRACK&quot;, &quot;SUPPRISKSCORE231501B&quot;,
+                &quot;SUPPRISKSCORE231501A&quot;, &quot;RATE231501A&quot;, &quot;RATE231501B&quot;,
+                &quot;SUPPRISKSCORE231502A&quot;, &quot;SUPPRISKSCORE231502B&quot;,
+                &quot;PREMYZ333102A&quot;, &quot;PREMYZ333102B&quot;, &quot;PREMYZ231502A&quot;,
+                &quot;PREMYZ231502B&quot;, &quot;RATE231502A&quot;, &quot;RATE231502B&quot;, &quot;RATE333101A&quot;,
+                &quot;RATE333101B&quot;, &quot;RATE333102A&quot;, &quot;RATE333102B&quot;, &quot;CASHVALUE333601&quot;,
+                &quot;RATE231601&quot;, &quot;RATE333601&quot;, &quot;SUPPRISKSCORE231601&quot;, &quot;RATE5608&quot;,
+                &quot;PLANQDWZBRIEF&quot;, &quot;RATE561101&quot;, &quot;LLCASEAFEHZ1t&quot;,
+                &quot;LLCASEAFEHZ1s&quot;, &quot;RATE551401&quot;, &quot;RATE122101_2&quot;, &quot;RATE122101_3&quot;,
+                &quot;插入网点SQL&quot;, &quot;LDCODE_DATA&quot;, &quot;LLCLAIMUWMAIN_DATA&quot;,
+                &quot;LLCLAIMUWMDETAIL_DATA&quot;, &quot;ADMIN_MOVE_TABLE_YM&quot;,
+                &quot;LLCASE20161012&quot;, &quot;EXPLAIN_INSTANCE&quot;, &quot;EXPLAIN_STATEMENT&quot;,
+                &quot;EXPLAIN_ARGUMENT&quot;, &quot;EXPLAIN_OBJECT&quot;, &quot;EXPLAIN_OPERATOR&quot;,
+                &quot;EXPLAIN_PREDICATE&quot;, &quot;EXPLAIN_STREAM&quot;, &quot;ADVISE_INSTANCE&quot;,
+                &quot;ADVISE_INDEX&quot;, &quot;ADVISE_WORKLOAD&quot;, &quot;ADVISE_MQT&quot;,
+                &quot;ADVISE_PARTITION&quot;, &quot;ADVISE_TABLE&quot;, &quot;EXPLAIN_ACTUALS&quot;,
+                &quot;LRCESSLISTBAK&quot; };
+
+        bugschema = Arrays.asList(s1);
+        // 没有makedate的大表
+        bigschema.put(&quot;LCGCUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;CUST_INFO&quot;, &quot;etltime&quot;);
+        bigschema.put(&quot;LCCUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LCGUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LCUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LDTASKRUNLOG&quot;, &quot;executedate&quot;);
+        bigschema.put(&quot;HISTORY&quot;, &quot;outputdate&quot;);
+        bigschema.put(&quot;LOBCUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LOBGCUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LOBUWERROR&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LYRETURNFROMBANK&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LCPENOTICEITEM&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LICRMCONTINFO&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;TEMPRP&quot;, &quot;paydate&quot;);
+        bigschema.put(&quot;POL_MAIN_BAK&quot;, &quot;input_date&quot;);
+        bigschema.put(&quot;ENDO_FEE_BAK&quot;, &quot;app_date&quot;);
+        bigschema.put(&quot;WFCONTLIST&quot;, &quot;activedate&quot;);
+        bigschema.put(&quot;INTFDATATRACE&quot;, &quot;policydate&quot;);
+        bigschema.put(&quot;WFTRANSLOG&quot;, &quot;senddate&quot;);
+        bigschema.put(&quot;LRDUTY&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;ENDO_FEE&quot;, &quot;app_date&quot;);
+        bigschema.put(&quot;TEMP_GOLDELEPHANT&quot;, &quot;signdate&quot;);
+        bigschema.put(&quot;TEMP_GOLDELEPHANT2&quot;, &quot;signdate&quot;);
+        bigschema.put(&quot;CLAIM_MAIN&quot;, &quot;app_date&quot;);
+        bigschema.put(&quot;POL_MAIN&quot;, &quot;input_date&quot;);
+        bigschema.put(&quot;LIDATATRANSRESULT&quot;, &quot;accountdate&quot;);
+        bigschema.put(&quot;FIVOUCHERDATADETAIL&quot;, &quot;accountdate&quot;);
+        bigschema.put(&quot;LIABORIGINALDATA&quot;, &quot;paydate&quot;);
+        bigschema.put(&quot;LLCASEOPTIME&quot;, &quot;startdate&quot;);
+        bigschema.put(&quot;LYRETURNFROMBANKB&quot;, &quot;modifydate&quot;);
+        bigschema.put(&quot;LKELECTRONCONT&quot;, &quot;contsenddate&quot;);
+
+        // 只保存年
+
+        yearschema.put(&quot;LFTZXML&quot;, &quot;statyear&quot;);
+        yearschema.put(&quot;LFRLXML&quot;, &quot;statyear&quot;);
+        yearschema.put(&quot;LFEXCELCOLL&quot;, &quot;statyear&quot;);
+        yearschema.put(&quot;LFXMLCOLL&quot;, &quot;statyear&quot;);
+
+        // 特殊
+
+        caoschema.put(&quot;T_POLICY_MAIN&quot;, &quot;datasign&quot;); // 20100824暂不会处理
+
+    }
+
+    // 执行全量导入
+    public boolean submitFull(String starttime, String endtime, String path) {
+        this.path = path;
+        fullupdate(starttime, endtime);
+
+        return true;
+    }
+
+    // 生成全量导入
+    public static void fullupdate(String startdate, String enddate) {
+
+        System.out.println(&quot;START FULL!&quot;);
+        String full = &quot;&quot;;
+        // 获取所有表名
+        // String mSQL =
+        // &quot;select name from sysibm.systables where type=&#39;T&#39; and creator=&#39;DB2INST1&#39; and name=&#39;LCCONT&#39;&quot;;//单表测试sql
+        String mSQL = &quot;select name from sysibm.systables where type=&#39;T&#39; and creator=&#39;DB2INST1&#39;&quot;;
+        SSRS mSSRS = new ExeSQL().execSQL(mSQL);
+        for (int i = 1; i &lt;= mSSRS.getMaxRow(); i++) {
+            String table = mSSRS.GetText(i, 1);
+            try {
+
+                System.out.println(&quot;正在导出：&quot; + table);
+
+                String sql = &quot;&quot;;
+
+                if (bugschema.contains(table)) {
+                    System.out.println(&quot;查询不了的表格，跳过&quot;);
+                    continue;
+                } else if (yearschema.containsKey(table)) {
+                    String where = yearschema.get(table);
+                    String startyear = startdate.split(&quot;-&quot;)[0];
+                    String endyear = enddate.split(&quot;-&quot;)[0];
+                    sql = &quot;select * from DB2INST1.&quot; + table
+                            + &quot; where statyear&gt;=&#39;&quot; + startyear
+                            + &quot;&#39; and statyear&lt;&#39;&quot; + endyear + &quot;&#39;&quot;;
+
+                } else if (bigschema.containsKey(table)) {
+                    String where = bigschema.get(table);
+                    sql = &quot;select * from DB2INST1.&quot; + table + &quot; where &quot; + where
+                            + &quot;&gt;=&#39;&quot; + startdate + &quot;&#39; and &quot; + where + &quot;&lt;&#39;&quot;
+                            + enddate + &quot;&#39;&quot;;
+
+                } else {
+                    String pdsql = &quot;select 1 from sysibm.syscolumns where tbname=&#39;&quot;
+                            + table.toUpperCase() + &quot;&#39; and name=&#39;MAKEDATE&#39;&quot;;
+                    SSRS pdSSRS = new ExeSQL().execSQL(pdsql);
+                    if (pdSSRS.getMaxRow() != 0) {
+                        sql = &quot;select * from DB2INST1.&quot; + table
+                                + &quot; where makedate&gt;=&#39;&quot; + startdate
+                                + &quot;&#39;  and makedate&lt;&#39;&quot; + enddate + &quot;&#39;&quot;;
+
+                    } else {
+                        sql = &quot;select * from DB2INST1.&quot; + table;
+                    }
+
+                }
+                String countsql = &quot;select count(1) from  db2inst1.&quot; + table;
+                SSRS countSSRS = new ExeSQL().execSQL(countsql);
+                int max = Integer.parseInt(countSSRS.GetText(1, 1));
+
+                // 区分大小表
+                /*
+                 * 对于超5w的大表 通过分页每次导出5000，避免导出过多内存溢出 但该功能随着数据量的大小所消耗时间会增加。
+                 * 通过使用fetch优化缩短一半时间，但是2亿数据还是很慢，不懂如何继续改进
+                 */
+
+                if (max &gt;= 50000) {
+                    int min = 0;
+
+                    System.out.println(&quot;开始分批导出：&quot;);
+                    while (min != max) {
+                        System.out.println(&quot;开始分批导出：从第&quot; + min + &quot;行开始导出5000行&quot;);
+                        String maxsql = &quot;SELECT * FROM &quot;
+                                + &quot;( SELECT B.*, ROWNUMBER() OVER() AS RN FROM (&quot;
+                                + sql + &quot;) AS B&quot; + &quot;)AS A WHERE A.RN &gt;=&quot; + min
+                                + &quot; fetch first 5000 rows only&quot;;
+                        // 生成cvs
+                        SSRS tSSRS = new ExeSQL().execSQL(maxsql);
+                        String url = path + &quot;/data/lis/&quot; + table.toLowerCase();
+                        full = url + &quot;/full//&quot; + changedate(startdate)
+                                + &quot;_21_30_01&quot; + &quot;-&quot; + changedate(enddate)
+                                + &quot;_21_30_01//&quot;; // 20161001_21_30_01
+                        createDir(path + &quot;/data&quot;);
+                        createDir(path + &quot;/data/lis/&quot;);
+                        createDir(url);
+                        createDir(url + &quot;/full//&quot;);
+                        createDir(full);
+
+                        writrCVS(tSSRS, full, &quot;data_full.csv&quot;);
+
+                        if (min + 5000 &gt;= max) {
+
+                            min = max;
+
+                        } else {
+                            min += 5000;
+                        }
+
+                    }
+                    ;
+                    System.out.println(&quot;分批导出完毕，共计&quot; + max);
+                    try {
+                        createSql(table, full, &quot;schema.sql&quot;);
+
+                    } catch (Exception e) {
+
+                        e.printStackTrace();
+                    }
+                    try {
+                        createFile(full + &quot;upload_completed&quot;);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    // 生成cvs
+                    SSRS tSSRS = new ExeSQL().execSQL(sql);
+                    String url = path + &quot;/data/lis/&quot; + table.toLowerCase();
+                    full = url + &quot;/full//&quot; + changedate(startdate)
+                            + &quot;_21_30_01&quot; + &quot;-&quot; + changedate(enddate)
+                            + &quot;_21_30_01//&quot;; // 20161001_21_30_01
+                    createDir(path + &quot;/data&quot;);
+                    createDir(path + &quot;/data/lis/&quot;);
+                    createDir(url);
+                    createDir(url + &quot;/full//&quot;);
+                    createDir(full);
+
+                    writrCVS(tSSRS, full, &quot;data_full.csv&quot;);
+
+                    createSql(table, full, &quot;schema.sql&quot;);
+                    createFile(full + &quot;upload_completed&quot;);
+
+                }
+            } catch (Exception e) {
+                writeTxt2(&quot;导出&quot; + table + &quot;出错&quot;, path + &quot;/data/bug.txt&quot;);
+                continue;
+            }
+
+        }
+        System.out.println(&quot;END&quot;);
+
+    }
+
+    // 增量导入
+    public void increaseupdate(String date) {
+        System.out.println(&quot;START INCREASE!&quot;);
+        String mSQL = &quot;select name from sysibm.systables where type=&#39;T&#39; and creator=&#39;DB2INST1&#39;&quot;;
+        SSRS mSSRS = new ExeSQL().execSQL(mSQL);
+        for (int i = 1; i &lt;= mSSRS.getMaxRow(); i++) {
+            String table = mSSRS.GetText(i, 1);
+            String sql = &quot;&quot;;
+            if (bugschema.contains(table)) {
+                System.out.println(&quot;查询不了的表格，跳过&quot;);
+                continue;
+            } else if (yearschema.containsKey(table)) {
+                String where = yearschema.get(table);
+                String startyear = date.split(&quot;-&quot;)[0];
+
+                sql = &quot;select * from &quot; + table + &quot; where statyear=&quot; + startyear
+                        + &quot;&quot;;
+
+            } else if (bigschema.containsKey(table)) {
+                String where = bigschema.get(table);
+                sql = &quot;select * from &quot; + table + &quot; where &quot; + where + &quot;=&#39;&quot;
+                        + date + &quot;&#39;&quot;;
+
+            } else {
+                String pdsql = &quot;select 1 from sysibm.syscolumns where tbname=&#39;&quot;
+                        + table.toUpperCase() + &quot;&#39; and name=&#39;MAKEDATE&#39;&quot;;
+                SSRS pdSSRS = new ExeSQL().execSQL(pdsql);
+                if (pdSSRS.getMaxRow() != 0) {
+                    sql = &quot;select * from &quot; + table + &quot; where makedate=&#39;&quot; + date
+                            + &quot;&#39;&quot;;
+
+                } else {
+                    System.out.println(&quot;固定表&quot; + table + &quot;不进行增量导入&quot;);
+                    continue;
+                }
+
+            }
+            String countsql = &quot;select count(1) from  db2inst1.&quot; + table;
+            SSRS countSSRS = new ExeSQL().execSQL(countsql);
+            int max = Integer.parseInt(countSSRS.GetText(1, 1));
+
+            // 区分大小表
+
+            if (max &gt;= 50000) {
+                int min = 0;
+
+                String url = &quot;&quot;;
+                String full = &quot;&quot;;
+
+                while (min != max) {
+                    System.out.println(&quot;开始分批导出：从第&quot; + min + &quot;行开始导出5000行&quot;);
+                    String maxsql = &quot;SELECT * FROM &quot;
+                            + &quot;( SELECT B.*, ROWNUMBER() OVER() AS RN FROM (&quot;
+                            + sql + &quot;) AS B&quot; + &quot;)AS A WHERE A.RN &gt;=&quot; + min
+                            + &quot; fetch first 5000 rows only&quot;;
+                    // 生成cvs
+                    SSRS tSSRS = new ExeSQL().execSQL(maxsql);
+                    url = path + &quot;/data/lis/&quot; + table.toLowerCase();
+                    full = url + &quot;/incremental//&quot; + changedate(date)
+                            + getCurrentTime() + &quot;//&quot;;
+                    createDir(path + &quot;/data&quot;);
+                    createDir(path + &quot;/data/lis/&quot;);
+                    createDir(url);
+                    createDir(url + &quot;/incremental//&quot;);
+                    createDir(full);
+
+                    writrCVS(tSSRS, full, &quot;data_insert_updated.csv&quot;);
+                    if (min + 5000 &gt;= max) {
+
+                        min = max;
+
+                    } else {
+                        min += 5000;
+                    }
+
+                }
+                ;
+                System.out.println(&quot;分批导出完毕，共计&quot; + max);
+                try {
+                    // 创建创表语句，为提升效率改为从全量数据文件夹粘贴
+                    // createSql(table, full, &quot;schema.sql&quot;);
+                    createFile(full + &quot;schema.sql&quot;);
+                    coby(url
+                            + &quot;/full//20050101_21_30_01-20100101_21_30_01//schema.sql&quot;,
+                            full + &quot;schema.sql&quot;);
+                    createFile(full + &quot;upload_completed&quot;);
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                }
+
+            } else {
+                SSRS tSSRS = new ExeSQL().execSQL(sql);
+                String url = path + &quot;/data/lis/&quot; + table.toLowerCase();
+                String full = url + &quot;/incremental//&quot; + changedate(date)
+                        + getCurrentTime() + &quot;//&quot;;
+                createDir(path + &quot;/data&quot;);
+                createDir(path + &quot;/data/lis/&quot;);
+                createDir(url);
+                createDir(url + &quot;/incremental//&quot;);
+                createDir(full);
+
+                writrCVS(tSSRS, full, &quot;data_insert_updated.csv&quot;);
+                try {
+                    // 创建创表语句，为提升效率改为从全量数据文件夹粘贴
+                    // createSql(table, full, &quot;schema.sql&quot;);
+                    createFile(full + &quot;schema.sql&quot;);
+                    coby(url
+                            + &quot;/full//20050101_21_30_01-20100101_21_30_01//schema.sql&quot;,
+                            full + &quot;schema.sql&quot;);
+                    createFile(full + &quot;upload_completed&quot;);
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+        System.out.println(&quot;END&quot;);
+    }
+
+    /*
+     * 创建目录 如果存在则不创建
+     */
+    public static boolean createDir(String destDirName) {
+        File dir = new File(destDirName);
+        if (dir.exists()) {// 判断目录是否存在
+
+            return true;
+        }
+
+        if (dir.mkdirs()) {// 创建目标目录
+            System.out.println(&quot;创建目录成功！&quot; + destDirName);
+            return true;
+        } else {
+            System.out.println(&quot;创建目录失败！&quot;);
+            return false;
+        }
+    }
+
+    /*
+     * 创建文档，存在则不创建
+     */
+
+    public static boolean createFile(String FileName) throws IOException {
+        File dir = new File(FileName);
+        if (dir.exists()) {// 判断目录是否存在
+
+            return true;
+        }
+
+        if (dir.createNewFile()) {// 创建目标目录
+            System.out.println(&quot;创建文件成功！&quot; + FileName);
+            return true;
+        } else {
+            System.out.println(&quot;创建文件失败！&quot;);
+            return false;
+        }
+
+    }
+
+    /*
+     * 写入cvs 编码：UTF8 以“|”隔开
+     */
+    public static void writrCVS(SSRS tSSRS, String url, String filename) {
+        System.out.println(&quot;START WRITECVS!&quot;);
+        FileOutputStream tFileOutputStream;
+        try {
+            createFile(url + filename);
+            tFileOutputStream = new FileOutputStream(url + filename, true);
+            // tFileOutputStream = new FileOutputStream(url + filename);
+            OutputStreamWriter tOutputStreamWriter = new OutputStreamWriter(
+                    tFileOutputStream, &quot;utf-8&quot;);
+
+            BufferedWriter mBufferedWriter = new BufferedWriter(
+                    tOutputStreamWriter);
+            for (int i = 1; i &lt;= tSSRS.getMaxRow(); i++) {
+                StringBuffer sb = new StringBuffer();
+                for (int j = 1; j &lt;= tSSRS.getMaxCol(); j++) {
+                    String info = tSSRS.GetText(i, j);
+                    sb.append(info);
+                    sb.append(&quot;|&quot;);
+
+                }
+                sb.deleteCharAt(sb.lastIndexOf(&quot;|&quot;));
+                String string = sb.toString();
+                // System.out.println(string);
+                mBufferedWriter.write(string);
+                mBufferedWriter.newLine();
+                mBufferedWriter.flush();
+            }
+            mBufferedWriter.close();
+            tOutputStreamWriter.close();
+            tFileOutputStream.close();
+        } catch (Exception e) {
+            System.out.println(&quot;创建文件失败&quot;);
+            writeTxt2(&quot;导出&quot; + filename + &quot;出错&quot;, path + &quot;/data/bug.txt&quot;);
+        }
+        System.out.println(&quot;END&quot;);
+    }
+
+    /*
+     * 自动生成建表sql 目前如果为空表不确定能否生成TAT 如果生成过，会重写覆盖
+     */
+    public static void createSql(String table, String url, String name)
+            throws SQLException {
+        Connection conn = null;
+        try {
+
+            System.out.println(&quot;START CREATESQL!&quot;);
+            // 用于拼凑字符串
+            StringBuffer sb = new StringBuffer();
+            // 查找表格列是否可以为空，表名和是否可以为空存入map
+            String tSQL = &quot;select name,nulls from sysibm.syscolumns where tbname=&#39;&quot;
+                    + table + &quot;&#39;&quot;;
+            SSRS tSSRS = new ExeSQL().execSQL(tSQL);
+            Map&lt;String, String&gt; map = new HashMap&lt;String, String&gt;();
+            for (int i = 1; i &lt;= tSSRS.getMaxRow(); i++) {
+                String value = &quot;&quot;;
+                if (&quot;Y&quot;.equals(tSSRS.GetText(i, 2))) {
+                    value = &quot; &quot;;
+                } else {
+                    value = &quot;NOT NULL&quot;;
+                }
+                map.put(tSSRS.GetText(i, 1), value);
+
+            }
+            // 查找表格主键 主键列名存入list
+            String cSQL = &quot;select colname from SYSCAT.KEYCOLUSE where tabname=&#39;&quot;
+                    + table + &quot;&#39;&quot;;
+            SSRS cSSRS = new ExeSQL().execSQL(cSQL);
+            List&lt;String&gt; list = new ArrayList&lt;String&gt;();
+            if (cSSRS.getMaxRow() == 0) {
+
+            } else {
+                for (int i = 1; i &lt;= cSSRS.getMaxRow(); i++) {
+
+                    list.add(cSSRS.GetText(i, 1));
+
+                }
+            }
+            // 为了查找顺序列名的sql，好像必须有数据，未测试空表
+            String sql = &quot;select * from db2inst1.&quot; + table
+                    + &quot; fetch first 1 rows only with ur&quot;;
+
+            String columnName = &quot;&quot;;
+            String columnTypeName = &quot;&quot;;
+            int columnDisplaySize = 0;
+            int max = 0;
+            conn = DBConnPool.getConnection();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            ResultSetMetaData data = rs.getMetaData();
+
+            sb.append(&quot;CREATE TABLE &quot; + table + &quot; (&quot;);
+            rs.next();
+            for (int i = 1; i &lt;= data.getColumnCount(); i++) {
+                // 获得指定列的列名
+                columnName = data.getColumnName(i);
+                // 获得指定列的数据类型名
+                columnTypeName = data.getColumnTypeName(i);
+                // 在数据库中类型的最大字符个数
+                columnDisplaySize = data.getColumnDisplaySize(i);
+                // 保留位数
+                max = data.getScale(i);
+                // System.out.println(columnName + &quot;,&quot; + columnTypeName + &quot;,&quot;+
+                // columnDisplaySize);
+                String nulls = map.get(columnName);
+                sb.append(columnName + &quot; &quot;);
+                // 有小数点约定的
+                if (&quot;DECIMAL&quot;.equals(columnTypeName)) {
+                    sb.append(columnTypeName + &quot;(&quot; + columnDisplaySize + &quot;,&quot;
+                            + max + &quot;) &quot; + nulls);
+                } else {
+                    sb.append(columnTypeName + &quot;(&quot; + columnDisplaySize + &quot;) &quot;
+                            + nulls);
+                }
+
+                if (list.contains(columnName)) {
+                    sb.append(&quot; &quot; + &quot; primary key,\n&quot;);
+                } else {
+                    sb.append(&quot; &quot; + &quot;,\n&quot;);
+                }
+            }
+            // 去掉末尾多余,
+            sb.deleteCharAt(sb.lastIndexOf(&quot;,&quot;));
+            sb.append(&quot;);&quot;);
+            String sqlString = sb.toString();
+            FileOutputStream tFileOutputStream;
+            try {
+                String filename = url + &quot;//&quot; + name;
+                createFile(filename);
+                // tFileOutputStream = new FileOutputStream(filename, true);
+                // 不会覆盖，会续写
+                tFileOutputStream = new FileOutputStream(filename);
+                OutputStreamWriter tOutputStreamWriter = new OutputStreamWriter(
+                        tFileOutputStream, &quot;utf-8&quot;);
+
+                BufferedWriter mBufferedWriter = new BufferedWriter(
+                        tOutputStreamWriter);
+                mBufferedWriter.write(sqlString);
+
+                mBufferedWriter.close();
+                tOutputStreamWriter.close();
+                tFileOutputStream.close();
+            } catch (Exception e) {
+                System.out.println(&quot;创建文件失败&quot;);
+                e.printStackTrace();
+            }
+
+            rs.close();
+
+            System.out.println(&quot;END&quot;);
+        } catch (Exception e) {
+            writeTxt2(&quot;创建&quot; + table + &quot;的sql语句出错&quot;, path + &quot;/data/bug.txt&quot;);
+        } finally {
+            conn.close();
+        }
+
+    }
+
+    public static void coby(String inputpath, String outputpath) {
+        byte[] dates = new byte[1024];
+        FileInputStream fis = null;
+        FileOutputStream fos = null;
+        try {
+            fis = new FileInputStream(inputpath);
+            fos = new FileOutputStream(outputpath);
+            long time1 = System.currentTimeMillis();
+            int i = fis.read(dates);
+            while (i != -1) {
+                fos.write(dates, 0, i);
+                i = fis.read(dates);
+            }
+            long time2 = System.currentTimeMillis();
+            long time3 = time2 - time1;
+            System.out.println(time3);
+        } catch (Exception e) {
+            // TODO: handle exception
+        } finally {
+            try {
+                fos.close();
+                fis.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    /*
+     * 日期格式转换 yyyy-mm-dd to yyyymmdd
+     */
+    public static String changedate(String date) {
+        String[] s = date.split(&quot;-&quot;);
+        StringBuffer sb = new StringBuffer();
+        for (String s1 : s) {
+            sb.append(s1);
+        }
+
+        return sb.toString();
+
+    }
+
+    // 输出txt文件，会覆盖之前写的文件
+    public static void writeTxt(String bl, String filepath) {
+
+        // 确定写出文件的位置
+        try {
+            createFile(filepath);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        File file = new File(filepath);
+        // 建立输出字节流
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(file);
+            pw.println(bl);
+            System.out.println(&quot;写入成功&quot;);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            pw.close();
+        }
+    }
+
+    // 输出TXT 不会覆盖之前文件，会续写
+    public static void writeTxt2(String bl, String filepath) {
+        FileOutputStream tFileOutputStream = null;
+        OutputStreamWriter tOutputStreamWriter = null;
+        BufferedWriter mBufferedWriter = null;
+        try {
+            createFile(filepath);
+            tFileOutputStream = new FileOutputStream(filepath, true);
+            // tFileOutputStream = new FileOutputStream(url + filename);
+            tOutputStreamWriter = new OutputStreamWriter(tFileOutputStream,
+                    &quot;utf-8&quot;);
+
+            mBufferedWriter = new BufferedWriter(tOutputStreamWriter);
+            mBufferedWriter.write(bl);
+            mBufferedWriter.newLine();
+            mBufferedWriter.flush();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+        } finally {
+            try {
+                mBufferedWriter.close();
+                tOutputStreamWriter.close();
+                tFileOutputStream.close();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    // 检查是否有表格未导出完全
+    public static void checkTxt() {
+        createDir(path + &quot;/data/&quot;);
+        createDir(path + &quot;/data/lis/&quot;);
+        createDir(path + &quot;/data/lis/bug/&quot;);
+        File f1 = new File(path + &quot;/data/lis/bug&quot;);
+        File[] f2 = f1.listFiles();
+        BufferedReader br = null;
+        for (File txt : f2) {
+            String filename = txt.getName();
+            if (filename.endsWith(&quot;.txt&quot;)) {
+                try {
+                    br = new BufferedReader(new FileReader(txt));
+                    String info = br.readLine();
+                    String[] s = info.split(&quot;|&quot;);
+                    String tablename = s[0];
+                    String time = s[1];
+                    String name = s[2];
+                    String bl = s[3];
+                    if (bl.indexOf(&quot;false&quot;) != -1) {
+                        String sql = &quot;select * from &quot; + tablename
+                                + &quot; where makedate=&#39;&quot; + time + &quot;&#39;&quot;;
+                        SSRS tSSRS = new ExeSQL().execSQL(sql);
+                        String url = path + &quot;/data/lis/&quot;
+                                + tablename.toLowerCase();
+                        String full = url + &quot;/incremental//&quot; + name + &quot;//&quot;;
+                        createDir(path + &quot;/data&quot;);
+                        createDir(path + &quot;/data/lis/&quot;);
+                        createDir(url);
+                        createDir(url + &quot;/incremental//&quot;);
+                        createDir(full);
+                        writrCVS(tSSRS, full, &quot;data_insert_updated.csv&quot;);
+
+                    }
+
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public static String getCurrentTime() {
+        String time = PubFun.getCurrentTime();
+        String currenttime = time.replaceAll(&quot;:&quot;, &quot;_&quot;);
+
+        return currenttime;
+
+    }
+
+    // 该方法于导出数据库信息无关
+    // 用于生成导入EXCEL时需要的配置文件
+    public static void createxml(String[] tables, String[] confignames) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(&quot;&lt;CONFIG&gt;\n&quot;);
+        for (String table : tables) {
+            int a = 0;
+            sb.append(&quot;&lt;&quot; + confignames[a] + &quot;&gt;\n&quot;);
+            sb.append(&quot;&lt;COL0&gt;&lt;/COL0&gt;\n&quot;);
+            System.out.println(&quot;START CREATEXML!&quot;);
+            Connection conn = null;
+            try {
+                // 为了查找顺序列名的sql，好像必须有数据，未测试空表
+                String sql = &quot;select * from db2inst1.&quot; + table
+                        + &quot; fetch first 1 rows only with ur&quot;;
+                String columnName = &quot;&quot;;
+                String columnTypeName = &quot;&quot;;
+                int columnDisplaySize = 0;
+                int max = 0;
+                conn = DBConnPool.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql);
+                ResultSetMetaData data = rs.getMetaData();
+                rs.next();
+
+                int j = 1;
+                // 由于我从第二个列开始需要导入所以i=2，如果表格全部导入为i=1
+                for (int i = 2; i &lt;= data.getColumnCount(); i++) {
+                    // 获得指定列的列名
+                    columnName = data.getColumnName(i);
+                    sb.append(&quot;&lt;COL&quot; + j + &quot;&gt;&quot; + columnName + &quot;&lt;/COL&quot; + j
+                            + &quot;&gt;\n&quot;);
+                    j += 1;
+                }
+                sb.append(&quot;&lt;/&quot; + confignames[a] + &quot;&gt;\n&quot;);
+                rs.close();
+                a += 1;
+            } catch (Exception e) {
+
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        sb.append(&quot;&lt;/CONFIG&gt;\n&quot;);
+        String sqlString = sb.toString();
+
+        writeTxt2(sqlString, &quot;F:/XFYJ.xml&quot;);
+        System.out.println(&quot;END&quot;);
+    }
+
+    // 该方法于导出数据库信息无关
+    // 用于生成导入EXCEL时需要的配置文件,只输出到所需列数,最后一列不会取到
+    public static void createxml(String[] tables, String[] confignames,
+            int startcol, int endcol) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(&quot;&lt;CONFIG&gt;\n&quot;);
+        for (String table : tables) {
+            int a = 0;
+            sb.append(&quot;&lt;&quot; + confignames[a] + &quot;&gt;\n&quot;);
+            sb.append(&quot;&lt;COL0&gt;&lt;/COL0&gt;\n&quot;);
+            System.out.println(&quot;START CREATEXML!&quot;);
+            Connection conn = null;
+            try {
+                // 为了查找顺序列名的sql，好像必须有数据，未测试空表
+                String sql = &quot;select * from db2inst1.&quot; + table
+                        + &quot; fetch first 1 rows only with ur&quot;;
+                String columnName = &quot;&quot;;
+                String columnTypeName = &quot;&quot;;
+                int columnDisplaySize = 0;
+                int max = 0;
+                conn = DBConnPool.getConnection();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql);
+                ResultSetMetaData data = rs.getMetaData();
+                rs.next();
+                if (endcol &gt; data.getColumnCount()) {
+                    endcol = data.getColumnCount();
+                }
+
+                int j = 1;
+                // 由于我从第二个列开始需要导入所以i=2，如果表格全部导入为i=1
+                for (int i = startcol; i &lt;= endcol; i++) {
+                    // 获得指定列的列名
+                    columnName = data.getColumnName(i);
+                    sb.append(&quot;&lt;COL&quot; + j + &quot;&gt;&quot; + columnName + &quot;&lt;/COL&quot; + j
+                            + &quot;&gt;\n&quot;);
+                    j += 1;
+                }
+                sb.append(&quot;&lt;/&quot; + confignames[a] + &quot;&gt;\n&quot;);
+                rs.close();
+                a += 1;
+            } catch (Exception e) {
+
+            } finally {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+
+        }
+        sb.append(&quot;&lt;/CONFIG&gt;\n&quot;);
+        String sqlString = sb.toString();
+
+        writeTxt2(sqlString, &quot;F:/XFYJ.xml&quot;);
+        System.out.println(&quot;END&quot;);
+    }
+    // 导出特定表的信息
+        public static void createtable(String [] tables) {
+
+            for (int i = 0; i &lt;tables.length; i++) {
+                String table = tables[i];
+                String sql = &quot;select * from &quot;+table+&quot; where prtno=&#39;1130002645147&#39;with ur&quot;;
+
+                    SSRS tSSRS = new ExeSQL().execSQL(sql);
+                    String url =  &quot;F:/data/lis/&quot; + table.toLowerCase();
+                    String full = url + &quot;/incremental//&quot; ;
+                    createDir( &quot;F:/data&quot;);
+                    createDir(&quot;F:/data/lis/&quot;);
+                    createDir(url);
+
+                    createDir(full);
+
+                    writrCVS(tSSRS, full, &quot;data.csv&quot;);
+//                    try {
+//                        // 创建创表语句，为提升效率改为从全量数据文件夹粘贴
+//                        // createSql(table, full, &quot;schema.sql&quot;);
+//                        createFile(full + &quot;schema.sql&quot;);
+//                        coby(url
+//                                + &quot;/full//20050101_21_30_01-20100101_21_30_01//schema.sql&quot;,
+//                                full + &quot;schema.sql&quot;);
+//                        createFile(full + &quot;upload_completed&quot;);
+//                    } catch (Exception e) {
+//
+//                        e.printStackTrace();
+//                    }
+
+
+
+            }
+            System.out.println(&quot;END&quot;);
+        }
+
+
+    public static void main(String[] args) throws Exception {
+        // 查询所有表
+        // String tSQL =
+        // &quot;SELECT TABNAME FROM SYSCAT.TABLES where type=&#39;T&#39; and creator=&#39;DB2INST1&#39; &quot;;
+        // select name from sysibm.systables where type=&#39;T&#39; and
+        // creator=&#39;DB2INST1&#39; ;
+        // LisTransferBL l1=new LisTransferBL();
+        // l1.submitFull(&quot;2005-01-01&quot;, &quot;2010-01-01&quot;, &quot;F://&quot;);
+        // System.out.println(PubFun.getCurrentTime());
+        // String mSQL =
+        // &quot;select * from LCCONT where makedate&gt;=&#39;2005-01-01&#39; and makedate&lt;=&#39;2006-01-01&#39;&quot;;
+        // String maxsql=&quot;SELECT * FROM &quot;
+        // +&quot;( SELECT B.*, ROWNUMBER() OVER() AS RN FROM&quot;
+        // +mSQL+&quot;) AS B&quot;
+        // +&quot;)AS A WHERE A.RN BETWEEN 1 AND 10000&quot;;
+        // SSRS mSSRS = new ExeSQL().execSQL(mSQL);
+        // String url = &quot;F://&quot;+&quot;/data/lis/&quot; + &quot;lccont&quot;;
+        // String full = url + &quot;/incremental//20170410&quot; + &quot;//&quot;;
+        // createDir(&quot;F://&quot;+&quot;/data&quot;);
+        // createDir(&quot;F://&quot;+&quot;/data/lis/&quot;);
+        // createDir(url);
+        // createDir(url + &quot;/incremental//&quot;);
+        // createDir(full);
+        //
+        // writrCVS(mSSRS, full, &quot;data_insert_updated.csv&quot;);
+        // try {
+        // //创建创表语句，为提升效率改为从全量数据文件夹粘贴
+        // createSql(&quot;LCCONT&quot;, full, &quot;schema.sql&quot;);
+        //
+        //
+        // createFile(full+&quot;upload_completed&quot;);
+        // } catch (Exception e) {
+        //
+        // e.printStackTrace();
+        // }
+        // System.out.println(PubFun.getCurrentTime());
+//        String[] tables = { &quot;XFYJAPPNTINFO&quot;,&quot;XFYJINSUREDINFO&quot;};
+//        String[] conf = { &quot;AppntInfo&quot;,&quot;InsuredInfo&quot; };
+//        createxml(tables, conf);
+        String [] tables={&quot;LCCONT&quot;,&quot;LCINSURED&quot;,&quot;LCAPPNT&quot;,&quot;LCPOL&quot;};
+        createtable(tables);
+    }
+}
+</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2017/05/02/springmvc上传文件/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="springmvc上传文件">上一篇</a>
+		
+
+		
+		
+			<a href="/2017/05/02/360安全浏览器下载提交两次问题/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="360安全浏览器下载提交两次问题">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://yoursite.com/2017/05/02/用java导出数据库所有表信息，以及自己写的拼凑建表语句程序/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://yoursite.com">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">61</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">1</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>layui提示框改造右下通知框（参考svg）万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://yoursite.com" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>layui提示框改造右下通知框（参考svg）</h4>
+    <time datetime="2018-08-08T09:55:51.000Z"><i class="fa fa-clock-o"></i>2018-08-08</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/81512862" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/81512862</a>   </p>
+<p>  实现后样式：<br> <img src="../../../../image/2.png" alt></p>
+<p> 1.首先创建CSS样式：</p>
+<pre><code>@import url(&#39;https://fonts.googleapis.com/css?family=Raleway:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i&#39;);
+
+
+.toast__container {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.toast__cell{
+    display:inline-block;
+}
+
+.add-margin{
+    margin-top:0px;
+}
+
+.toast__svg{
+    fill:#fff;
+}
+
+.toast {
+    text-align:left;
+    padding: 21px 0;
+    background-color:#fff;
+    border-radius:4px;
+    max-width: 500px;
+    top: 0px;
+    position:relative;
+    box-shadow: 1px 7px 14px -5px rgba(0,0,0,0.2);
+}
+
+
+.toast:before {
+    content: &#39;&#39;;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-top-left-radius:4px;
+    border-bottom-left-radius: 4px;
+
+}
+
+.toast__icon{
+    position:absolute;
+    top:50%;
+    left:22px;
+    transform:translateY(-50%);
+    width:14px;
+    height:14px;
+    padding: 7px;
+    border-radius:50%;
+    display:inline-block;
+}
+
+.toast__type {
+    color: #3e3e3e;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.toast__message {
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 0;
+    color: #878787;
+}
+
+.toast__content{
+    padding-left:70px;
+    padding-right:60px;
+}
+
+.toast__close {
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    width: 14px;
+    cursor:pointer;
+    height: 14px;
+    fill:#878787;
+    transform: translateY(-50%);
+}
+
+.toast--green .toast__icon{
+    background-color:#2BDE3F;
+}
+
+.toast--green:before{
+    background-color:#2BDE3F;
+}
+
+.toast--blue .toast__icon{
+    background-color:#1D72F3;
+}
+
+.tole{
+    background-color:#1D72F3;
+}
+
+.toast--yellow .toast__icon{
+    background-color:#FFC007;
+}
+
+.toast--yellow:before{
+    background-color:#FFC007;
+}</code></pre><p> 2.创建JS（未使用方便我提出来专门一个JS）：</p>
+<pre><code>define(function(require, exports) {
+    require(&#39;${appPath}/layui/layui.js&#39;);
+    /**
+     * 右下角提示框
+     * @param title
+     * @param info
+     */
+    exports.svgSendMsg=function (title,info,type) {
+        $(&#39;head&#39;).find(&#39;link[href=&quot;${appPath}/layui/css/svg.css&quot;]&#39;).remove();
+        $(&#39;head&#39;).prepend(&quot;&lt;link href=&#39;${appPath}/layui/css/svg.css&#39; rel=&#39;stylesheet&#39; type=&#39;text/css&#39; /&gt;&quot;);
+        layui.use(&#39;layer&#39;, function () {
+            layer.open({
+                offset: &#39;rb&#39;,
+                title: false,
+                area: [&#39;350px&#39;, &#39;85px&#39;],
+                shade: 0,
+                type: 1,
+                content: getContent(title,info,type),
+                time: 10000,
+                icon: 1,
+                anim: 2
+            });
+        })
+
+    }
+
+    function getContent(title,info,type) {
+        if(type==0){
+            return &#39;&lt;div class=&quot;toast toast--green&quot;&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__icon&quot;&gt;&#39; +
+                &#39;    &lt;svg version=&quot;1.1&quot; class=&quot;toast__svg&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; x=&quot;0px&quot; y=&quot;0px&quot; viewBox=&quot;0 0 512 512&quot; style=&quot;enable-background:new 0 0 512 512;&quot; xml:space=&quot;preserve&quot;&gt;&#39; +
+                &#39;&lt;g&gt;&lt;g&gt;&lt;path d=&quot;M504.502,75.496c-9.997-9.998-26.205-9.998-36.204,0L161.594,382.203L43.702,264.311c-9.997-9.998-26.205-9.997-36.204,0    c-9.998,9.997-9.998,26.205,0,36.203l135.994,135.992c9.994,9.997,26.214,9.99,36.204,0L504.502,111.7    C514.5,101.703,514.499,85.494,504.502,75.496z&quot;&gt;&lt;/path&gt;&#39; +
+                &#39;&lt;/g&gt;&lt;/g&gt;&#39; +
+                &#39;    &lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__content&quot;&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__type&quot;&gt;&#39;+title+&#39;&lt;/p&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__message&quot;&gt;&#39;+info+&#39;&lt;/p&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__close&quot;&gt;&#39; +
+                &#39;    &lt;svg version=&quot;1.1&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 15.642 15.642&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; enable-background=&quot;new 0 0 15.642 15.642&quot;&gt; &#39; +
+                &#39;&lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;&lt;/div&gt;&#39;
+        }else if(type==1){
+            return &#39;&lt;div class=&quot;toast toast--blue add-margin&quot;&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__icon&quot;&gt;&#39; +
+                &#39;&lt;svg version=&quot;1.1&quot; class=&quot;toast__svg&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; x=&quot;0px&quot; y=&quot;0px&quot; viewBox=&quot;0 0 32 32&quot; style=&quot;enable-background:new 0 0 32 32;&quot; xml:space=&quot;preserve&quot;&gt;&#39; +
+                &#39;&lt;g&gt;&#39; +
+                &#39;&lt;g id=&quot;info&quot;&gt;&#39; +
+                &#39;&lt;g&gt;&#39; +
+                &#39;&lt;path  d=&quot;M10,16c1.105,0,2,0.895,2,2v8c0,1.105-0.895,2-2,2H8v4h16v-4h-1.992c-1.102,0-2-0.895-2-2L20,12H8     v4H10z&quot;&gt;&lt;/path&gt;&#39; +
+                &#39;&lt;circle  cx=&quot;16&quot; cy=&quot;4&quot; r=&quot;4&quot;&gt;&lt;/circle&gt;&#39; +
+                &#39;&lt;/g&gt;&#39; +
+                &#39;&lt;/g&gt;&#39; +
+                &#39;&lt;/g&gt;&#39; +
+                &#39;&#39; +
+                &#39;    &lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__content&quot;&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__type&quot;&gt;&#39;+title+&#39;&lt;/p&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__message&quot;&gt;&#39;+info+&#39;&lt;/p&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__close&quot;&gt;&#39; +
+                &#39;    &lt;svg version=&quot;1.1&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 15.642 15.642&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; enable-background=&quot;new 0 0 15.642 15.642&quot;&gt;&#39; +
+                &#39;&#39; +
+                &#39;&lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;&lt;/div&gt;&#39;
+        }else{
+            return &#39;&lt;div class=&quot;toast toast--yellow add-margin&quot;&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__icon&quot;&gt;&#39; +
+                &#39;&lt;svg version=&quot;1.1&quot; class=&quot;toast__svg&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; x=&quot;0px&quot; y=&quot;0px&quot; viewBox=&quot;0 0 301.691 301.691&quot; style=&quot;enable-background:new 0 0 301.691 301.691;&quot; xml:space=&quot;preserve&quot;&gt;&#39; +
+                &#39;&lt;g&gt;&#39; +
+                &#39;&lt;polygon points=&quot;119.151,0 129.6,218.406 172.06,218.406 182.54,0  &quot;&gt;&lt;/polygon&gt;&#39; +
+                &#39;&lt;rect x=&quot;130.563&quot; y=&quot;261.168&quot; width=&quot;40.525&quot; height=&quot;40.523&quot;&gt;&lt;/rect&gt;&#39; +
+                &#39;&lt;/g&gt;&#39; +
+                &#39;    &lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__content&quot;&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__type&quot;&gt;&#39;+title+&#39;&lt;/p&gt;&#39; +
+                &#39;    &lt;p class=&quot;toast__message&quot;&gt;&#39;+info+&#39;&lt;/p&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;  &lt;div class=&quot;toast__close&quot;&gt;&#39; +
+                &#39;    &lt;svg version=&quot;1.1&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 15.642 15.642&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; enable-background=&quot;new 0 0 15.642 15.642&quot;&gt;&#39; +
+                &#39;&lt;/svg&gt;&#39; +
+                &#39;  &lt;/div&gt;&#39; +
+                &#39;&lt;/div&gt;&#39;
+        }
+    }
+})</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/09/17/linux学习笔记/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="linux学习笔记">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/07/20/juc同时起跑问题/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="juc同时起跑问题">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://yoursite.com/2018/08/08/layui提示框改造右下通知框（参考svg）/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://yoursite.com">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">61</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">1</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

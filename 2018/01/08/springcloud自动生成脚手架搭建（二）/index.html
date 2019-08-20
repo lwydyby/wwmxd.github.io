@@ -1,0 +1,792 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>springcloud自动生成脚手架搭建（二）万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://yoursite.com" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>springcloud自动生成脚手架搭建（二）</h4>
+    <time datetime="2018-01-08T06:52:59.000Z"><i class="fa fa-clock-o"></i>2018-01-08</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/79002766" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/79002766</a>   </p>
+<p>   完成之后的前台页面展示：</p>
+<p> 测试地址 ：dota2info.cn/index </p>
+<p> <img src="https://img-blog.csdn.net/20180108144929167?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMzY3NTI2MzI=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt>  </p>
+<p> 1.配置pom.xml</p>
+<pre><code>  &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatisplus-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;1.0.4&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+            &lt;version&gt;${mybatis.spring.boot.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;mysql&lt;/groupId&gt;
+            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+            &lt;version&gt;${mysql.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;druid&lt;/artifactId&gt;
+            &lt;version&gt;${druid.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;commons-lang&lt;/groupId&gt;
+            &lt;artifactId&gt;commons-lang&lt;/artifactId&gt;
+            &lt;version&gt;${commons.lang.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;commons-io&lt;/groupId&gt;
+            &lt;artifactId&gt;commons-io&lt;/artifactId&gt;
+            &lt;version&gt;${commons.io.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;commons-configuration&lt;/groupId&gt;
+            &lt;artifactId&gt;commons-configuration&lt;/artifactId&gt;
+            &lt;version&gt;${commons.configuration.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.alibaba&lt;/groupId&gt;
+            &lt;artifactId&gt;fastjson&lt;/artifactId&gt;
+            &lt;version&gt;${fastjson.version}&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;artifactId&gt;velocity&lt;/artifactId&gt;
+            &lt;groupId&gt;org.apache.velocity&lt;/groupId&gt;
+            &lt;version&gt;2.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.baomidou&lt;/groupId&gt;
+            &lt;artifactId&gt;mybatis-plus&lt;/artifactId&gt;
+            &lt;version&gt;2.1.7&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;net.sourceforge.nekohtml&lt;/groupId&gt;
+            &lt;artifactId&gt;nekohtml&lt;/artifactId&gt;
+            &lt;version&gt;1.9.22&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.apache.velocity&lt;/groupId&gt;
+            &lt;artifactId&gt;velocity-engine-core&lt;/artifactId&gt;
+            &lt;version&gt;2.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;com.gameley&lt;/groupId&gt;
+            &lt;artifactId&gt;gameley-common&lt;/artifactId&gt;
+            &lt;version&gt;1.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.dom4j&lt;/groupId&gt;
+            &lt;artifactId&gt;dom4j&lt;/artifactId&gt;
+            &lt;version&gt;2.0.0&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-test&lt;/artifactId&gt;
+            &lt;version&gt;4.3.13.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-test&lt;/artifactId&gt;
+            &lt;version&gt;1.5.5.RELEASE&lt;/version&gt;
+        &lt;/dependency&gt;
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-test&lt;/artifactId&gt;
+        &lt;/dependency&gt;</code></pre><p> 数据库使用mysql,使用mybatis-plus作为连接数据库工具</p>
+<p> 2.配置application.yml </p>
+<pre><code># Tomcat
+server:
+    tomcat:
+        max-threads: 10
+        min-spare-threads: 10
+    port: 7777
+
+# mysql
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://localhost:3306/ag_admin?useUnicode=true&amp;characterEncoding=UTF-8&amp;useSSL=false
+        username: root
+        password: 123456
+    jackson:
+        time-zone: GMT+8
+        date-format: yyyy-MM-dd HH:mm:ss
+    thymeleaf:
+        mode: LEGACYHTML5
+        cache: false
+
+# Mybatis配置
+mybatis:
+    mapperLocations: classpath:mapper/*.xml
+#mybatis
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  #实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.gameley.generator.entity
+  global-config:
+    #主键类型  0:&quot;数据库ID自增&quot;, 1:&quot;用户输入ID&quot;,2:&quot;全局唯一ID (数字类型唯一ID)&quot;, 3:&quot;全局唯一ID UUID&quot;;
+    id-type: 0
+    #字段策略 0:&quot;忽略判断&quot;,1:&quot;非 NULL 判断&quot;),2:&quot;非空判断&quot;
+    field-strategy: 2
+    #驼峰下划线转换
+    db-column-underline: true
+    #刷新mapper 调试神器
+    refresh-mapper: true
+    #数据库大写下划线转换
+    #capital-mode: true
+    #序列接口实现类配置
+    #key-generator: cn.jeefast.xxx
+    #逻辑删除配置
+    logic-delete-value: 0
+    logic-not-delete-value: 1
+    #自定义填充策略接口实现
+    #meta-object-handler: cn.jeefast.xxx
+    #自定义SQL注入器
+    #sql-injector: cn.jeefast.xxx
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+
+</code></pre><p> 3.编写主要的生成工具类： </p>
+<pre><code>package com.gameley.generator.utils;
+
+import com.baomidou.mybatisplus.plugins.Page;
+import com.gameley.generator.entity.ColumnEntity;
+import com.gameley.generator.entity.TableEntity;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.WordUtils;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+/**
+ * 代码生成器   工具类
+ *
+ * @author chenshun
+ * @email sunlightcs@gmail.com
+ * @date 2016年12月19日 下午11:40:24
+ */
+public class GeneratorUtils {
+
+    public static List&lt;String&gt; getTemplates() {
+        List&lt;String&gt; templates = new ArrayList&lt;String&gt;();
+        templates.add(&quot;template/index.vue.vm&quot;);
+        templates.add(&quot;template/mapper.xml.vm&quot;);
+        templates.add(&quot;template/entity.java.vm&quot;);
+        templates.add(&quot;template/mapper.java.vm&quot;);
+        templates.add(&quot;template/controller.java.vm&quot;);
+        templates.add(&quot;template/service.java.vm&quot;);
+        templates.add(&quot;template/serviceImpl.java.vm&quot;);
+        return templates;
+    }
+
+    /**
+     * 生成代码
+     */
+    public static void generatorCode(Map&lt;String, String&gt; table,
+                                     List&lt;Map&lt;String, String&gt;&gt; columns, ZipOutputStream zip) {
+        //配置信息
+        Configuration config = getConfig();
+
+        //表信息
+        TableEntity tableEntity = new TableEntity();
+        tableEntity.setTableName(table.get(&quot;tableName&quot;));
+        tableEntity.setComments(table.get(&quot;tableComment&quot;));
+        //表名转换成Java类名
+        String className = tableToJava(tableEntity.getTableName(), config.getString(&quot;tablePrefix&quot;));
+        tableEntity.setClassName(className);
+        tableEntity.setClassname(StringUtils.uncapitalize(className));
+
+        //列信息
+        List&lt;ColumnEntity&gt; columsList = new ArrayList&lt;&gt;();
+        for (Map&lt;String, String&gt; column : columns) {
+            ColumnEntity columnEntity = new ColumnEntity();
+            columnEntity.setColumnName(column.get(&quot;columnName&quot;));
+            columnEntity.setDataType(column.get(&quot;dataType&quot;));
+            columnEntity.setComments(column.get(&quot;columnComment&quot;));
+            columnEntity.setExtra(column.get(&quot;extra&quot;));
+
+            //列名转换成Java属性名
+            String attrName = columnToJava(columnEntity.getColumnName());
+            columnEntity.setAttrName(attrName);
+            columnEntity.setAttrname(StringUtils.uncapitalize(attrName));
+
+            //列的数据类型，转换成Java类型
+            String attrType = config.getString(columnEntity.getDataType(), &quot;unknowType&quot;);
+            columnEntity.setAttrType(attrType);
+
+            //是否主键
+            if (&quot;PRI&quot;.equalsIgnoreCase(column.get(&quot;columnKey&quot;)) &amp;&amp; tableEntity.getPk() == null) {
+                tableEntity.setPk(columnEntity);
+            }
+
+            columsList.add(columnEntity);
+        }
+        tableEntity.setColumns(columsList);
+
+        //没主键，则第一个字段为主键
+        if (tableEntity.getPk() == null) {
+            tableEntity.setPk(tableEntity.getColumns().get(0));
+        }
+
+        //设置velocity资源加载器
+        Properties prop = new Properties();
+        prop.put(&quot;file.resource.loader.class&quot;, &quot;org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader&quot;);
+        Velocity.init(prop);
+
+        //封装模板数据
+        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;tableName&quot;, tableEntity.getTableName());
+        map.put(&quot;comments&quot;, tableEntity.getComments());
+        map.put(&quot;pk&quot;, tableEntity.getPk());
+        map.put(&quot;className&quot;, tableEntity.getClassName());
+        map.put(&quot;classname&quot;, tableEntity.getClassname());
+        map.put(&quot;pathName&quot;, tableEntity.getClassname().toLowerCase());
+        map.put(&quot;columns&quot;, tableEntity.getColumns());
+        map.put(&quot;package&quot;, config.getString(&quot;package&quot;));
+        map.put(&quot;author&quot;, config.getString(&quot;author&quot;));
+        map.put(&quot;email&quot;, config.getString(&quot;email&quot;));
+        map.put(&quot;datetime&quot;, DateUtils.format(new Date(), DateUtils.DATE_TIME_PATTERN));
+        map.put(&quot;moduleName&quot;, config.getString(&quot;mainModule&quot;));
+        map.put(&quot;secondModuleName&quot;, toLowerCaseFirstOne(className));
+        map.put(&quot;enableCache&quot;,false);  //不开启二级缓存
+        map.put(&quot;baseResultMap&quot;,true);
+
+        VelocityContext context = new VelocityContext(map);
+
+        //获取模板列表
+        List&lt;String&gt; templates = getTemplates();
+        for (String template : templates) {
+            //渲染模板
+            StringWriter sw = new StringWriter();
+            Template tpl = Velocity.getTemplate(template, &quot;UTF-8&quot;);
+            tpl.merge(context, sw);
+
+            try {
+                //添加到zip
+                zip.putNextEntry(new ZipEntry(getFileName(template, tableEntity.getClassName(), config.getString(&quot;package&quot;), config.getString(&quot;mainModule&quot;))));
+                IOUtils.write(sw.toString(), zip, &quot;UTF-8&quot;);
+                IOUtils.closeQuietly(sw);
+                zip.closeEntry();
+            } catch (IOException e) {
+                throw new RuntimeException(&quot;渲染模板失败，表名：&quot; + tableEntity.getTableName(), e);
+            }
+        }
+    }
+
+
+    /**
+     * 列名转换成Java属性名
+     */
+    public static String columnToJava(String columnName) {
+        return WordUtils.capitalizeFully(columnName, new char[]{&#39;_&#39;}).replace(&quot;_&quot;, &quot;&quot;);
+    }
+
+    /**
+     * 表名转换成Java类名
+     */
+    public static String tableToJava(String tableName, String tablePrefix) {
+        if (StringUtils.isNotBlank(tablePrefix)) {
+            tableName = tableName.replace(tablePrefix, &quot;&quot;);
+        }
+        return columnToJava(tableName);
+    }
+
+    /**
+     * 获取配置信息
+     */
+    public static Configuration getConfig() {
+        try {
+            return new PropertiesConfiguration(&quot;generator.properties&quot;);
+        } catch (ConfigurationException e) {
+            throw new RuntimeException(&quot;获取配置文件失败，&quot;, e);
+        }
+    }
+
+    /**
+     * 获取文件名
+     */
+    public static String getFileName(String template, String className, String packageName, String moduleName) {
+        String packagePath = &quot;main&quot; + File.separator + &quot;java&quot; + File.separator;
+        String frontPath = &quot;ui&quot; + File.separator;
+        if (StringUtils.isNotBlank(packageName)) {
+            packagePath += packageName.replace(&quot;.&quot;, File.separator) + File.separator;
+        }
+
+        if (template.contains(&quot;index.vue.vm&quot;)) {
+            return frontPath + &quot;views&quot; + File.separator + moduleName + File.separator + toLowerCaseFirstOne(className) + File.separator + &quot;index.vue&quot;;
+        }
+
+        if (template.contains(&quot;service.java.vm&quot;)) {
+            return packagePath + &quot;service&quot; + File.separator + className + &quot;Service.java&quot;;
+        }
+        if (template.contains(&quot;mapper.java.vm&quot;)) {
+            return packagePath + &quot;dao&quot; + File.separator + className + &quot;Dao.java&quot;;
+        }
+        if (template.contains(&quot;entity.java.vm&quot;)) {
+            return packagePath + &quot;entity&quot; + File.separator + className + &quot;.java&quot;;
+        }
+        if (template.contains(&quot;controller.java.vm&quot;)) {
+            return packagePath + &quot;controller&quot; + File.separator + className + &quot;Controller.java&quot;;
+        }
+        if (template.contains(&quot;serviceImpl.java.vm&quot;)) {
+            return packagePath + &quot;service&quot; + File.separator +&quot;impl&quot;+File.separator+ className + &quot;ServiceImpl.java&quot;;
+        }
+        if (template.contains(&quot;mapper.xml.vm&quot;)) {
+            return &quot;main&quot; + File.separator + &quot;resources&quot; + File.separator + &quot;mapper&quot; + File.separator + className + &quot;Mapper.xml&quot;;
+        }
+
+        return null;
+    }
+
+    //首字母转小写
+    public static String toLowerCaseFirstOne(String s) {
+        if (Character.isLowerCase(s.charAt(0))) {
+            return s;
+        } else {
+            return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+        }
+    }
+
+}
+</code></pre><p> 其余部分及生成模板详见：<a href="https://gitee.com/lwydyby/springcloud-adplatform" target="_blank" rel="noopener">https://gitee.com/lwydyby/springcloud-adplatform</a><br>—- 2018-01-10——</p>
+<p> 增加springcloud-bus，以实现自动配置</p>
+<p> 1.在两个工程的pom.xml中引入</p>
+<pre><code>&lt;!--消息总线--&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-cloud-starter-bus-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+&lt;!--config--&gt;
+&lt;dependency&gt;
+   &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+   &lt;artifactId&gt;spring-boot-starter-actuator&lt;/artifactId&gt;
+&lt;/dependency&gt;</code></pre><p> 2.在config的配置中加入 </p>
+<pre><code>  rabbitmq:
+        host: rabbitmq   # 登录 Rabbitmq 后台管理页面地址为：http://localhost:15672
+        port: 5672
+        username: guest   # 默认账户
+        password: guest   # 默认密码</code></pre><p> 3.在generator增加config配置类 （这里只做了对数据库的动态配置） </p>
+<pre><code>package com.gameley.generator.config;
+
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+
+import com.alibaba.druid.pool.DruidDataSource;
+
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ *
+ * 配置数据库
+ * @author wwmxd
+ * @version 1.2.0
+ */
+@Slf4j
+@Configuration
+@RefreshScope
+public class DruidConfiguration {
+    @Value(&quot;${spring.datasource.url}&quot;)
+    private String dbUrl;
+    @Value(&quot;${spring.datasource.username}&quot;)
+    private String username;
+    @Value(&quot;${spring.datasource.password}&quot;)
+    private String password;
+
+
+
+    @Bean     //声明其为Bean实例
+    @Primary  //在同样的DataSource中，首先使用被标注的DataSource
+    @RefreshScope
+    public DataSource dataSource(){
+        DruidDataSource datasource = new DruidDataSource();
+        datasource.setUrl(dbUrl);
+        datasource.setUsername(username);
+        datasource.setPassword(password);
+        return datasource;
+    }
+}</code></pre><p> 4.配置github或者码云上的项目管理，增加WebHooks，来主动推送更新 增加的url,例如：</p>
+<p> http://{ip}:8888/bus/refresh</p>
+<p> 如需设置密码，则在config中增加配置</p>
+<pre><code>encrypt:
+  key: 123456</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/01/09/springcloud脚手架搭建（三）---搭建generator的docker镜像/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="springcloud脚手架搭建（三）---搭建generator的docker镜像">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/01/06/deepin(unbuntu)系统 java+redis+rabbitmq+mysql+idea等开发环境安装/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="deepin(unbuntu)系统 java+redis+rabbitmq+mysql+idea等开发环境安装">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://yoursite.com/2018/01/08/springcloud自动生成脚手架搭建（二）/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://yoursite.com">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">61</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">1</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>filebeat+logstash对springcloud项目日志进行解析万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://yoursite.com" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>filebeat+logstash对springcloud项目日志进行解析</h4>
+    <time datetime="2018-02-22T08:31:19.000Z"><i class="fa fa-clock-o"></i>2018-02-22</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/79348146" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/79348146</a>   </p>
+<p>  项目地址：<a href="https://gitee.com/lwydyby/springcloud-adplatform" target="_blank" rel="noopener">https://gitee.com/lwydyby/springcloud-adplatform</a><br> 该项目的日志目前可以分为三种：<br> (1)项目启动日志<br> (2)controller层的操作日志（通过aop实现记录）<br> (3)项目非controller层异常日志<br> 由于分为3种格式，则需要三种macth进行匹配：</p>
+<pre><code>grok {       
+        match =&gt; [&quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type}  com.gameley.common.Interceptor.HttpAspect - %{GREEDYDATA:log_json}&quot;,
+        &quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type} %{NOTSPACE:classname} \- (?&lt;error&gt;[\s\S]*)&quot;,
+         &quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type}  %{NOTSPACE:classname} \- %{GREEDYDATA:otherinfo}&quot; ]
+    }  </code></pre><p> 使用logstash自带表达式的格式一般为：%{SYNTAX:SEMANTIC}<br> 即： SYNTAX <code>代表匹配值的类型，例如，</code> 0.11 <code>可以</code> NUMBER <code>类型所匹配，</code> 10.222.22.25 <code>可以使用</code> IP <code>匹配。 
+*</code> SEMANTIC <code>表示存储该值的一个变量声明，</code> client_ip_address`这个字段里边，类似数据库的列名<br> 具体可参考：<a href="http://blog.csdn.net/liukuan73/article/details/52318243" target="_blank" rel="noopener">http://blog.csdn.net/liukuan73/article/details/52318243</a><br> 而自定义匹配需要使用正则表达式，格式为 </p>
+<pre><code>( ?&lt;列名&gt;正则表达式)</code></pre><p> 注：[\s\S]*为匹配剩余所有的字符，我这里是用来匹配错误日志的详细信息的<br> 由于controller层日志是以json格式进行的存储，除使用grok之外还需使用 json进行解析</p>
+<pre><code>  json {  
+        source =&gt; &quot;log_json&quot;  
+        target =&gt; &quot;content&quot;  
+        remove_field=&gt;[&quot;logjson&quot;]  
+     }  </code></pre><p> 完整配置文件为：</p>
+<pre><code>input {
+  beats {
+    port =&gt; 5044
+  }
+}
+filter{
+    grok {       
+        match =&gt; [&quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type}  com.gameley.common.Interceptor.HttpAspect - %{GREEDYDATA:log_json}&quot;,
+        &quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type} %{NOTSPACE:classname} \- (?&lt;error&gt;[\s\S]*)&quot;,
+         &quot;message&quot;,&quot;%{TIMESTAMP_ISO8601:timestamp} \[%{NOTSPACE:thread}\] %{WORD:type}  %{NOTSPACE:classname} \- %{GREEDYDATA:otherinfo}&quot; ]
+    }   
+     json {  
+        source =&gt; &quot;log_json&quot;  
+        target =&gt; &quot;content&quot;  
+        remove_field=&gt;[&quot;logjson&quot;]  
+     }  
+}
+output {
+  elasticsearch {
+    hosts =&gt; [&quot;localhost&quot;]
+    manage_template =&gt; false
+    index =&gt; &quot;%{[fields][logIndex]}-%{+YYYY.MM.dd}&quot;
+    document_type =&gt; &quot;%{[fields][docType]}&quot;
+  }
+}</code></pre><p> 除需要配置logstash之外，还需要对filebeat进行配置，以设置如何发送日志（处理多行日志）：</p>
+<pre><code>filebeat:
+  prospectors:
+  -
+    paths:
+      - &quot;/data/logs/*.log&quot;
+    fields:
+      logIndex: userservice
+      docType: springcloud
+      project: adplatform
+    multiline:
+      pattern: &#39;^[0-9]{4}-[0-9]{2}-[0-9]{2}&#39;
+      negate: true
+      match: after
+      timeout: 5s
+output:
+  logstash:
+    hosts: [&quot;localhost:5044&quot;]</code></pre><p> 日志文件样例：</p>
+<pre><code>2018-02-22 16:09:59.876 [main] INFO  o.s.integration.channel.PublishSubscribeChannel - Channel &#39;user-service:dev:8763.errorChannel&#39; has 1 subscriber(s).
+2018-02-22 16:09:59.876 [main] INFO  o.s.integration.endpoint.EventDrivenConsumer - started _org.springframework.integration.errorLogger
+2018-02-22 16:09:59.913 [main] INFO  o.s.i.endpoint.SourcePollingChannelAdapter - started sleuthStreamSpanReporter.poll.inboundChannelAdapter
+2018-02-22 16:09:59.913 [main] INFO  o.s.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147482647
+2018-02-22 16:09:59.913 [main] INFO  o.s.context.support.DefaultLifecycleProcessor - Starting beans in phase 2147483647
+2018-02-22 16:09:59.966 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler [&quot;http-nio-8763&quot;]
+2018-02-22 16:09:59.991 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler [&quot;http-nio-8763&quot;]
+2018-02-22 16:09:59.992 [main] INFO  org.apache.tomcat.util.net.NioSelectorPool - Using a shared selector for servlet write/read
+2018-02-22 16:10:00.081 [main] INFO  o.s.b.c.e.tomcat.TomcatEmbeddedServletContainer - Tomcat started on port(s): 8763 (http)
+2018-02-22 16:10:00.082 [main] INFO  o.s.c.n.e.s.EurekaAutoServiceRegistration - Updating port to 8763
+2018-02-22 16:10:00.088 [main] INFO  com.gameley.UserServiceApplication - Started UserServiceApplication in 281.136 seconds (JVM running for 285.806)
+2018-02-22 16:10:13.234 [http-nio-8763-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring FrameworkServlet &#39;dispatcherServlet&#39;
+2018-02-22 16:10:13.234 [http-nio-8763-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - FrameworkServlet &#39;dispatcherServlet&#39;: initialization started
+2018-02-22 16:10:13.301 [http-nio-8763-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - FrameworkServlet &#39;dispatcherServlet&#39;: initialization completed in 67 ms
+2018-02-22 16:12:26.850 [http-nio-8763-exec-10] INFO  com.gameley.common.Interceptor.HttpAspect - {&quot;address&quot;:&quot;http://192.168.0.43:8763/user/validate&quot;,&quot;args&quot;:&quot;[admin, 123456]&quot;,&quot;classMethod&quot;:&quot;com.gameley.controller.UserController.validate&quot;,&quot;httpMethod&quot;:&quot;POST&quot;,&quot;ip&quot;:&quot;192.168.0.43&quot;,&quot;result&quot;:&quot;UserInfo{id=&#39;32&#39;, username=&#39;null&#39;, password=&#39;null&#39;, name=&#39;admin&#39;, description=&#39;null&#39;, updTime=null}&quot;,&quot;time&quot;:1041}
+2018-02-22 16:12:27.971 [task-scheduler-5] INFO  o.s.integration.codec.kryo.CompositeKryoRegistrar - registering [40, java.io.File] with serializer org.springframework.integration.codec.kryo.FileSerializer
+2018-02-22 16:12:28.276 [http-nio-8763-exec-9] INFO  com.gameley.common.Interceptor.HttpAspect - {&quot;address&quot;:&quot;http://192.168.0.43:8763/user/validate&quot;,&quot;args&quot;:&quot;[admin, 123456]&quot;,&quot;classMethod&quot;:&quot;com.gameley.controller.UserController.validate&quot;,&quot;httpMethod&quot;:&quot;POST&quot;,&quot;ip&quot;:&quot;192.168.0.43&quot;,&quot;result&quot;:&quot;UserInfo{id=&#39;32&#39;, username=&#39;null&#39;, password=&#39;null&#39;, name=&#39;admin&#39;, description=&#39;null&#39;, updTime=null}&quot;,&quot;time&quot;:7}</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/02/23/mysql数据库常见数据结构和语句优化/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="mysql数据库常见数据结构和语句优化">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/02/06/springboot kafka消费者获取不到信息/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="springboot kafka消费者获取不到信息">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://yoursite.com/2018/02/22/filebeat+logstash对springcloud项目日志进行解析/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://yoursite.com">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">61</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">1</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

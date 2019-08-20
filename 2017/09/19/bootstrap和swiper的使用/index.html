@@ -1,0 +1,399 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>bootstrap和swiper的使用万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://yoursite.com" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>bootstrap和swiper的使用</h4>
+    <time datetime="2017-09-19T08:54:16.000Z"><i class="fa fa-clock-o"></i>2017-09-19</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/78031952" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/78031952</a>   </p>
+<p>   Bootstrap下载地址：<a href="http://www.bootcss.com/" target="_blank" rel="noopener">http://www.bootcss.com/</a> （响应式框架）</p>
+<p> Swiper 下载地址：<a href="http://www.swiper.com.cn/" target="_blank" rel="noopener">http://www.swiper.com.cn/</a> （轮播框架）</p>
+<p> 一．引用：</p>
+ <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1, user-scalable=no">//为了兼容手机端  
+ <link href="css/bootstrap.css" rel="stylesheet">  
+ <link rel="stylesheet" href="css/swiper.css">  
+ <link rel="stylesheet" href="css/animate.min.css">
+
+
+<pre><code>&lt;!-- 如果要使用Bootstrap的JS插件，则必须引入jQuery --&gt; &lt;script src=&quot;js/jquery-2.2.3.min.js&quot;&gt;&lt;/script&gt; &lt;!-- Bootstrap的JS插件 --&gt; &lt;script src=&quot;js/bootstrap.min.js&quot;&gt;&lt;/script&gt; &lt;script src=&quot;js/jquery.unveilEffects.js&quot;&gt;&lt;/script&gt; &lt;script src=&quot;js/swiper.animate1.0.2.min.js&quot;&gt;&lt;/script&gt; &lt;script src=&quot;js/jquery.hovertreescroll.js&quot;&gt;&lt;/script&gt; &lt;script src=&quot;js/swiper.min.js&quot;&gt;&lt;/script&gt;</code></pre><p> 注：1.引入js时必须先引入jquery 因为大部分控件都是基于jquery</p>
+<p> 2.如果需要更改框架原有样式，请把自己开发的css放在后边</p>
+<p> 二．bootstrap框架使用</p>
+<p> 开发文档见：<a href="http://v3.bootcss.com/" target="_blank" rel="noopener">http://v3.bootcss.com/</a></p>
+<ol>
+<li>bootstrap栅格将页面一行分为12格，高度为自适应，如需固定高度请自己设置css</li>
+</ol>
+<pre><code>bootstrap根据不同尺寸设备将属性分为lg md xs sm四种 ，如果需要针对不同尺寸优化可以使用自带的样式，也可以通过media query进行自行修改如@media(max-width:@screen-xs-max){...}</code></pre><ol start="2">
+<li><p>bootstrap可以设置不同尺寸设备的可见性，如visible-xs等</p>
+</li>
+<li><p>bootstrap自带的头部导航为fixed的，即会跟随屏幕一直在顶端，但是需要设置</p>
+<p>body{padding-top:导航高度+20px}，否则导航下的控件会被覆盖显示不全</p>
+</li>
+</ol>
+<pre><code>4. 如果需要居中容器可以设置：</code></pre><pre><code>&lt;divclass=&quot;container&quot;&gt; ... &lt;/div&gt;但是宽度为70%</code></pre><pre><code>如需100%宽度请使用</code></pre><pre><code> &lt;divclass=&quot;container-fluid&quot;&gt; ... &lt;/div&gt;</code></pre><pre><code> 或者自己修改为width:100%</code></pre><pre><code></code></pre><pre><code>三． Swiper使用</code></pre><pre><code>Swiper开发文档[http://www.swiper.com.cn/api/index.html](http://www.swiper.com.cn/api/index.html)</code></pre><pre><code>Swiper为跨平台的轮播框架，可以实现延迟动画等功能</code></pre><pre><code>1.使用swiper必须先初始化，多个控件可修改为.</code></pre><pre><code>swiper-container1，.swiper-container2</code></pre><pre><code>&lt;script&gt; $(document).ready(**function **() {  **var **mySwiper = **new **Swiper(&#39;.swiper-container&#39;, {  direction: &#39;horizontal&#39;, loop: **true**, autoplay: 3000,//可选选项，自动滑动 autoplayDisableOnInteraction: **false**, grabCursor: **true**, speed: 300, // 如果需要分页器 pagination: &#39;.swiper-pagination&#39;, paginationType: &#39;bullets&#39;, paginationClickable: **true**, }) }  &lt;/script&gt;</code></pre><pre><code></code></pre><p> 2.如果需要前进后退按钮可以添加</p>
+<p> nextButton: ‘.swiper-button-next’,</p>
+<p> prevButton:’.swiper-button-prev’,</p>
+<p> 其他控件见文档（如横屏竖屏滚动等）</p>
+<p> 3.基本内容为：</p>
+<p> &lt;<strong>div</strong>class=”swiper-container”&gt;</p>
+<p> &lt;<strong>div</strong>class=”swiper-wrapper”&gt;</p>
+<p> &lt;<strong>div</strong>class=”swiper-slide”&gt;Slide 1&lt;/<strong>div</strong>&gt;</p>
+<p> &lt;<strong>div</strong>class=”swiper-slide”&gt;Slide 2&lt;/<strong>div</strong>&gt;</p>
+<p> &lt;<strong>div</strong>class=”swiper-slide”&gt;Slide 3&lt;/<strong>div</strong>&gt;</p>
+<p> &lt;/<strong>div</strong>&gt;</p>
+ <!-- 如果需要分页器 -->
+
+<p> &lt;<strong>div</strong>class=”swiper-pagination”&gt;&lt;/<strong>div</strong>&gt;</p>
+ <!-- 如果需要导航按钮 -->
+
+<p> &lt;<strong>div</strong>class=”swiper-button-prev”&gt;&lt;/<strong>div</strong>&gt;</p>
+<p> &lt;<strong>div</strong>class=”swiper-button-next”&gt;&lt;/<strong>div</strong>&gt;</p>
+ <!-- 如果需要滚动条 -->
+
+<p> &lt;<strong>div</strong>class=”swiper-scrollbar”&gt;&lt;/<strong>div</strong>&gt;</p>
+<p> &lt;/<strong>div</strong>&gt;</p>
+<h1 id="5-如果需要动画效果则需引入Swiper-Animate"><a href="#5-如果需要动画效果则需引入Swiper-Animate" class="headerlink" title="5. 如果需要动画效果则需引入Swiper Animate"></a>5. 如果需要动画效果则需引入Swiper Animate</h1><h1 id="引入方式见一"><a href="#引入方式见一" class="headerlink" title="引入方式见一"></a>引入方式见一</h1><h1 id="引入后必须初始化，即在swiper初始方法中加入"><a href="#引入后必须初始化，即在swiper初始方法中加入" class="headerlink" title="引入后必须初始化，即在swiper初始方法中加入"></a>引入后必须初始化，即在swiper初始方法中加入</h1><pre><code>onInit: **function **(swiper) { //Swiper2.x的初始化是onFirstInit swiperAnimateCache(swiper); //隐藏动画元素 swiperAnimate(swiper); //初始化完成开始动画 }, onSlideChangeEnd: **function **(swiper) { swiperAnimate(swiper); //每个slide切换结束时也运行当前slide动画 }</code></pre><h1 id="之后只需需要动画效果中加入class-”ani”以及三个参数"><a href="#之后只需需要动画效果中加入class-”ani”以及三个参数" class="headerlink" title="之后只需需要动画效果中加入class=”ani”以及三个参数"></a>之后只需需要动画效果中加入class=”ani”以及三个参数</h1><p> <strong>如</strong>&lt;<strong>div class</strong>=”swiper-slide”&gt;</p>
+ <p **class**="ani" swiper-animate-effect="fadeInUp" swiper-animate-duration="0.5s" swiper-animate-delay="0.3s">内容</p>
+
+<h1 id><a href="#" class="headerlink" title></a></h1><h1 id="具体动画效果见：http-www-swiper-com-cn-usage-animate-index-html"><a href="#具体动画效果见：http-www-swiper-com-cn-usage-animate-index-html" class="headerlink" title="具体动画效果见：http://www.swiper.com.cn/usage/animate/index.html"></a>具体动画效果见：<a href="http://www.swiper.com.cn/usage/animate/index.html" target="_blank" rel="noopener">http://www.swiper.com.cn/usage/animate/index.html</a></h1><h1 id="6-分页器和导航按钮样式可以通过修改swiper-css来改变，初始为背景色，可以修改为背景图"><a href="#6-分页器和导航按钮样式可以通过修改swiper-css来改变，初始为背景色，可以修改为背景图" class="headerlink" title="6. 分页器和导航按钮样式可以通过修改swiper.css来改变，初始为背景色，可以修改为背景图"></a>6. 分页器和导航按钮样式可以通过修改swiper.css来改变，初始为背景色，可以修改为背景图</h1><p># </p>
+<h1 id="四开发中遇到的问题"><a href="#四开发中遇到的问题" class="headerlink" title="四开发中遇到的问题"></a>四开发中遇到的问题</h1><h1 id="1-li横向排布：float-left-浮动结束如果下个容器显示位置受到影响可以使用bootstrap提供的或者"><a href="#1-li横向排布：float-left-浮动结束如果下个容器显示位置受到影响可以使用bootstrap提供的或者" class="headerlink" title="1. li横向排布：float:left 浮动结束如果下个容器显示位置受到影响可以使用bootstrap提供的或者"></a>1. li横向排布：float:left 浮动结束如果下个容器显示位置受到影响可以使用bootstrap提供的<div class="clearfix’/">或者<div style="’clear:both’/"></div></div></h1><h1 id="2-容器左右居中：margin-0-auto-0为margin-top-可以根据需求修改"><a href="#2-容器左右居中：margin-0-auto-0为margin-top-可以根据需求修改" class="headerlink" title="2. 容器左右居中：margin:0 auto; (0为margin-top 可以根据需求修改)"></a>2. 容器左右居中：margin:0 auto; (0为margin-top 可以根据需求修改)</h1><h1 id="3-文字上下居中：font-size-line-height-容器高度；"><a href="#3-文字上下居中：font-size-line-height-容器高度；" class="headerlink" title="3. 文字上下居中：font-size:*;line-height:容器高度；"></a>3. 文字上下居中：font-size:*;line-height:容器高度；</h1><h1 id="4-文字左右居中：text-align-center"><a href="#4-文字左右居中：text-align-center" class="headerlink" title="4. 文字左右居中：text-align: center"></a>4. 文字左右居中：text-align: center</h1><h1 id="5-微调容器位置-position-relative-top-bottom-left-right"><a href="#5-微调容器位置-position-relative-top-bottom-left-right" class="headerlink" title="5. 微调容器位置 position: relative; top:?;bottom:?;left:?;right:?"></a>5. 微调容器位置 position: relative; top:?;bottom:?;left:?;right:?</h1><h1 id="6-Input中文字与左侧边框距离-padding-left-10px"><a href="#6-Input中文字与左侧边框距离-padding-left-10px" class="headerlink" title="6. Input中文字与左侧边框距离 padding-left:10px"></a>6. Input中文字与左侧边框距离 padding-left:10px</h1><h1 id="7-背景自动缩放到与容器大小一样-background-url-‘’-no-repeat-background-size-cover"><a href="#7-背景自动缩放到与容器大小一样-background-url-‘’-no-repeat-background-size-cover" class="headerlink" title="7. 背景自动缩放到与容器大小一样 background:url(‘’) no-repeat; background-size:cover;"></a>7. 背景自动缩放到与容器大小一样 background:url(‘’) no-repeat; background-size:cover;</h1><h1 id="8-背景自动拉伸到容器大小一样（完整显示一次）"><a href="#8-背景自动拉伸到容器大小一样（完整显示一次）" class="headerlink" title="8. 背景自动拉伸到容器大小一样（完整显示一次）"></a>8. 背景自动拉伸到容器大小一样（完整显示一次）</h1><h1 id="9-background-url-‘’-no-repeat-background-size-contain"><a href="#9-background-url-‘’-no-repeat-background-size-contain" class="headerlink" title="9. background:url(‘’) no-repeat; background-size:contain;"></a>9. background:url(‘’) no-repeat; background-size:contain;</h1><h1 id="10-css执行顺序：引入的从上到下，下面的会覆盖上面的，控件上的style优先级最高"><a href="#10-css执行顺序：引入的从上到下，下面的会覆盖上面的，控件上的style优先级最高" class="headerlink" title="10. css执行顺序：引入的从上到下，下面的会覆盖上面的，控件上的style优先级最高"></a>10. css执行顺序：引入的从上到下，下面的会覆盖上面的，控件上的style优先级最高</h1><h1 id="11-开发前，最好将样式清零：（使用bootstrap不需要，已经清除过了）"><a href="#11-开发前，最好将样式清零：（使用bootstrap不需要，已经清除过了）" class="headerlink" title="11. 开发前，最好将样式清零：（使用bootstrap不需要，已经清除过了）"></a>11. 开发前，最好将样式清零：（使用bootstrap不需要，已经清除过了）</h1><h1 id="html-body-div-span-applet-object-iframe-h1-h2-h3-h4-h5-h6-p-blockquote-pre-a"><a href="#html-body-div-span-applet-object-iframe-h1-h2-h3-h4-h5-h6-p-blockquote-pre-a" class="headerlink" title="html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,"></a>html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,</h1><h1 id="abbr-acronym-address-big-cite-code-del-dfn-em-font-img-ins-kbd-q-s-samp-small-strike-strong-sub-sup-tt"><a href="#abbr-acronym-address-big-cite-code-del-dfn-em-font-img-ins-kbd-q-s-samp-small-strike-strong-sub-sup-tt" class="headerlink" title="abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,"></a>abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,</h1><h1 id="var-b-u-i-center-dl-dt-dd-ol-ul-li-fieldset-form-label-legend-table-caption-tbody-tfoot-thead-tr-th-td"><a href="#var-b-u-i-center-dl-dt-dd-ol-ul-li-fieldset-form-label-legend-table-caption-tbody-tfoot-thead-tr-th-td" class="headerlink" title="var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{"></a>var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{</h1><h1 id="margin-0"><a href="#margin-0" class="headerlink" title="margin: 0;"></a>margin: 0;</h1><h1 id="padding-0"><a href="#padding-0" class="headerlink" title="padding: 0;"></a>padding: 0;</h1><h1 id="border-0"><a href="#border-0" class="headerlink" title="border: 0;"></a>border: 0;</h1><h1 id="outline-0"><a href="#outline-0" class="headerlink" title="outline: 0;"></a>outline: 0;</h1><h1 id="font-size-100"><a href="#font-size-100" class="headerlink" title="font-size: 100%;"></a>font-size: 100%;</h1><h1 id="vertical-align-baseline"><a href="#vertical-align-baseline" class="headerlink" title="vertical-align: baseline;"></a>vertical-align: baseline;</h1><h1 id="background-transparent"><a href="#background-transparent" class="headerlink" title="background: transparent;"></a>background: transparent;</h1><h1 id="-1"><a href="#-1" class="headerlink" title="}"></a>}</h1><p># </p>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2017/12/26/mysql拆分字符串函数/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="mysql拆分字符串函数">上一篇</a>
+		
+
+		
+		
+			<a href="/2017/09/08/使用elementUI实现将图片上传到本地/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="使用elementUI实现将图片上传到本地">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://yoursite.com/2017/09/19/bootstrap和swiper的使用/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://yoursite.com">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">61</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">1</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>
