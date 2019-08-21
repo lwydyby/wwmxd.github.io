@@ -120,12 +120,12 @@
     
 
     <div class="blog-post-block-padding">
-        <a href="/2019/08/21/DNS原理/">DNS原理</a>
+        <a href="/2019/08/21/CoreDns源码解析/">CoreDns源码分析</a>
         <section>
             
                 
-                域名系统（Domain Name System）是整个互联网的电话簿，它能够将可被人理解的域名翻译成可被机器理解 IP 地址，使得互联网的使用者不再需要直接接触很难阅读和理解的 IP 地址。
-域名系统在现在的互联网中非常重要，因为服务器的 IP 地址可能会经常
+                
+首先main方法在coredns.go内，因为这个文件导入了core/plugin.go,而core/plugin.go内导入了所有插件，所以会执行所有插件的init方法,每个插件的init方法功能都一样，就是把自己注册为caddy中名为”dns” 的ser
                 ...
             
         </section>
@@ -146,12 +146,12 @@
     
 
     <div class="blog-post-block-padding">
-        <a href="/2019/08/21/CoreDns源码解析/">CoreDns源码分析</a>
+        <a href="/2019/08/21/DNS原理/">DNS原理</a>
         <section>
             
                 
-                
-首先main方法在coredns.go内，因为这个文件导入了core/plugin.go,而core/plugin.go内导入了所有插件，所以会执行所有插件的init方法,每个插件的init方法功能都一样，就是把自己注册为caddy中名为”dns” 的ser
+                域名系统（Domain Name System）是整个互联网的电话簿，它能够将可被人理解的域名翻译成可被机器理解 IP 地址，使得互联网的使用者不再需要直接接触很难阅读和理解的 IP 地址。
+域名系统在现在的互联网中非常重要，因为服务器的 IP 地址可能会经常
                 ...
             
         </section>
@@ -433,7 +433,7 @@
                     
                       <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
                     
-                      <li><a href="/tags/CoreDns-GoLang/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CoreDns GoLang">CoreDns GoLang</a></li>
+                      <li><a href="/tags/CoreDns-GoLang/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CoreDns,GoLang">CoreDns,GoLang</a></li>
                     
                       <li><a href="/tags/DNS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="DNS">DNS</a></li>
                     
