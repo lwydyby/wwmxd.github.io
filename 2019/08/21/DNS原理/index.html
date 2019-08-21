@@ -126,8 +126,8 @@
 <p>域名系统在现在的互联网中非常重要，因为服务器的 IP 地址可能会经常变动，如果没有了 DNS，那么可能 IP 地址一旦发生了更改，当前服务器的客户端就没有办法连接到目标的服务器了，如果我们为 IP 地址提供一个『别名』并在其发生变动时修改别名和 IP 地址的关系，那么我们就可以保证集群对外提供的服务能够相对稳定地被其他客户端访问。</p>
 <p>DNS 其实就是一个分布式的树状命名系统，它就像一个去中心化的分布式数据库，存储着从域名到 IP 地址的映射。</p>
 <h1 id="DNS服务工作原理"><a href="#DNS服务工作原理" class="headerlink" title="DNS服务工作原理"></a>DNS服务工作原理</h1><p>在我们对 DNS 有了简单的了解之后，接下来我们就可以进入 DNS 工作原理的部分了，作为用户访问互联网的第一站，当一台主机想要通过域名访问某个服务的内容时，需要先通过当前域名获取对应的 IP 地址。这时就需要通过一个 DNS 解析器负责域名的解析，下面的图片展示了 DNS 查询的执行过程：</p>
-<p><img src="http://note.youdao.com/yws/res/1442/197BEF52C42A40AE8FACC3888C79E6A5" alt="image"></p>
-<p><img src="http://note.youdao.com/yws/res/1376/4D2783A5304A47FB9BD9102F07BC9A89" alt="image"></p>
+<p><img src="/img/dns.png" alt="image"></p>
+<p><img src="/img/dns2.png" alt="image"></p>
 <ol>
 <li>本地的 DNS 客户端向 DNS 解析器发出解析 draveness.me 域名的请求；</li>
 <li>DNS 解析器首先会向就近的根 DNS 服务器 . 请求顶级域名 DNS 服务的地址；</li>
@@ -137,7 +137,7 @@
 <p>DNS 客户端接受到 IP 地址之后，整个 DNS 解析的过程就结束了，客户端接下来就会通过当前的 IP 地址直接向服务器发送请求。</p>
 <p>对于 DNS 解析器，这里使用的 DNS 查询方式是迭代查询，每个 DNS 服务并不会直接返回 DNS 信息，而是会返回另一台 DNS 服务器的位置，由客户端依次询问不同级别的 DNS 服务直到查询得到了预期的结果；另一种查询方式叫做递归查询，也就是 DNS 服务器收到客户端的请求之后会直接返回准确的结果，如果当前服务器没有存储 DNS 信息，就会访问其他的服务器并将结果返回给客户端。</p>
 <h2 id="域名层级"><a href="#域名层级" class="headerlink" title="域名层级"></a>域名层级</h2><p>域名层级是一个层级的树形结构，树的最顶层是根域名，一般使用 . 来表示，这篇文章所在的域名一般写作 draveness.me，但是这里的写法其实省略了最后的 .，也就是全称域名（FQDN）dravenss.me.。</p>
-<p><img src="http://note.youdao.com/yws/res/1387/BDABF8663C1D4B51A6018253F6475878" alt="image"></p>
+<p><img src="/img/dns3.png" alt="image"></p>
 <p>根域名下面的就是 com、net 和 me 等顶级域名以及次级域名 draveness.me，我们一般在各个域名网站中购买和使用的都是次级域名、子域名和主机名了。</p>
 <h2 id="域名服务器"><a href="#域名服务器" class="headerlink" title="域名服务器"></a>域名服务器</h2><p>既然域名的命名空间是树形的，那么用于处理域名解析的 DNS 服务器也是树形的，只是在树的组织和每一层的职责上有一些不同。DNS 解析器从根域名服务器查找到顶级域名服务器的 IP 地址，又从顶级域名服务器查找到权威域名服务器的 IP 地址，最终从权威域名服务器查出了对应服务的 IP 地址</p>
 <pre><code>$ dig -t A draveness.me +trace</code></pre><p>我们可以使用 dig 命令追踪 draveness.me 域名对应 IP 地址是如何被解析出来的，首先会向预置的 13 组根域名服务器发出请求获取顶级域名的地址：</p>
@@ -480,9 +480,9 @@ c0.nic.me.        172800    IN    AAAA    2001:500:55::1
                     
                       <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
                     
-                      <li><a href="/tags/DNS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="DNS">DNS</a></li>
-                    
                       <li><a href="/tags/CoreDns-GoLang/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CoreDns GoLang">CoreDns GoLang</a></li>
+                    
+                      <li><a href="/tags/DNS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="DNS">DNS</a></li>
                     
                   
                 </ul>
