@@ -1,0 +1,527 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>DNS原理万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'iJmUXc8LaoLWImgBPMXEIduG-gzGzoHsz',appKey:'LO8xrIFyiXfO58Irvj2UAW2l'});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://lwydyby.cn" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="http://lwydyby.cn" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>DNS原理</h4>
+    <time datetime="2019-08-21T02:32:36.000Z"><i class="fa fa-clock-o"></i>2019-08-21</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>域名系统（Domain Name System）是整个互联网的电话簿，它能够将可被人理解的域名翻译成可被机器理解 IP 地址，使得互联网的使用者不再需要直接接触很难阅读和理解的 IP 地址。</p>
+<p>域名系统在现在的互联网中非常重要，因为服务器的 IP 地址可能会经常变动，如果没有了 DNS，那么可能 IP 地址一旦发生了更改，当前服务器的客户端就没有办法连接到目标的服务器了，如果我们为 IP 地址提供一个『别名』并在其发生变动时修改别名和 IP 地址的关系，那么我们就可以保证集群对外提供的服务能够相对稳定地被其他客户端访问。</p>
+<p>DNS 其实就是一个分布式的树状命名系统，它就像一个去中心化的分布式数据库，存储着从域名到 IP 地址的映射。</p>
+<h1 id="DNS服务工作原理"><a href="#DNS服务工作原理" class="headerlink" title="DNS服务工作原理"></a>DNS服务工作原理</h1><p>在我们对 DNS 有了简单的了解之后，接下来我们就可以进入 DNS 工作原理的部分了，作为用户访问互联网的第一站，当一台主机想要通过域名访问某个服务的内容时，需要先通过当前域名获取对应的 IP 地址。这时就需要通过一个 DNS 解析器负责域名的解析，下面的图片展示了 DNS 查询的执行过程：</p>
+<p><img src="http://note.youdao.com/yws/res/1442/197BEF52C42A40AE8FACC3888C79E6A5" alt="image"></p>
+<p><img src="http://note.youdao.com/yws/res/1376/4D2783A5304A47FB9BD9102F07BC9A89" alt="image"></p>
+<ol>
+<li>本地的 DNS 客户端向 DNS 解析器发出解析 draveness.me 域名的请求；</li>
+<li>DNS 解析器首先会向就近的根 DNS 服务器 . 请求顶级域名 DNS 服务的地址；</li>
+<li>拿到顶级域名 DNS 服务 me. 的地址之后会向顶级域名服务请求负责 dravenss.me. 域名解析的命名服务；</li>
+<li>得到授权的 DNS 命名服务时，就可以根据请求的具体的主机记录直接向该服务请求域名对应的 IP 地址；</li>
+</ol>
+<p>DNS 客户端接受到 IP 地址之后，整个 DNS 解析的过程就结束了，客户端接下来就会通过当前的 IP 地址直接向服务器发送请求。</p>
+<p>对于 DNS 解析器，这里使用的 DNS 查询方式是迭代查询，每个 DNS 服务并不会直接返回 DNS 信息，而是会返回另一台 DNS 服务器的位置，由客户端依次询问不同级别的 DNS 服务直到查询得到了预期的结果；另一种查询方式叫做递归查询，也就是 DNS 服务器收到客户端的请求之后会直接返回准确的结果，如果当前服务器没有存储 DNS 信息，就会访问其他的服务器并将结果返回给客户端。</p>
+<h2 id="域名层级"><a href="#域名层级" class="headerlink" title="域名层级"></a>域名层级</h2><p>域名层级是一个层级的树形结构，树的最顶层是根域名，一般使用 . 来表示，这篇文章所在的域名一般写作 draveness.me，但是这里的写法其实省略了最后的 .，也就是全称域名（FQDN）dravenss.me.。</p>
+<p><img src="http://note.youdao.com/yws/res/1387/BDABF8663C1D4B51A6018253F6475878" alt="image"></p>
+<p>根域名下面的就是 com、net 和 me 等顶级域名以及次级域名 draveness.me，我们一般在各个域名网站中购买和使用的都是次级域名、子域名和主机名了。</p>
+<h2 id="域名服务器"><a href="#域名服务器" class="headerlink" title="域名服务器"></a>域名服务器</h2><p>既然域名的命名空间是树形的，那么用于处理域名解析的 DNS 服务器也是树形的，只是在树的组织和每一层的职责上有一些不同。DNS 解析器从根域名服务器查找到顶级域名服务器的 IP 地址，又从顶级域名服务器查找到权威域名服务器的 IP 地址，最终从权威域名服务器查出了对应服务的 IP 地址</p>
+<pre><code>$ dig -t A draveness.me +trace</code></pre><p>我们可以使用 dig 命令追踪 draveness.me 域名对应 IP 地址是如何被解析出来的，首先会向预置的 13 组根域名服务器发出请求获取顶级域名的地址：</p>
+<pre><code>; &lt;&lt;&gt;&gt; DiG 9.10.6 &lt;&lt;&gt;&gt; -t A draveness.me +trace
+;; global options: +cmd
+.            197400    IN    NS    m.root-servers.net.
+.            197400    IN    NS    b.root-servers.net.
+.            197400    IN    NS    c.root-servers.net.
+.            197400    IN    NS    d.root-servers.net.
+.            197400    IN    NS    e.root-servers.net.
+.            197400    IN    NS    f.root-servers.net.
+.            197400    IN    NS    g.root-servers.net.
+.            197400    IN    NS    h.root-servers.net.
+.            197400    IN    NS    i.root-servers.net.
+.            197400    IN    NS    a.root-servers.net.
+.            197400    IN    NS    j.root-servers.net.
+.            197400    IN    NS    k.root-servers.net.
+.            197400    IN    NS    l.root-servers.net.
+.            197400    IN    RRSIG    NS 8 0 518400 20190715050000 20190702040000 59944 . GTeMFexpUcPhGNzuJVI7Nl4AYsiVfpZbZ302jjijr90kJ0DzvtpL0Of5 i68xQKbPFxNHOkD+e++xiNskuba+Tc0KOLmzRGRgdVUaAm1k2N3KhZ7R toB0Kw2kr2vqcXuF6XLA+kFej2YnHqVOCJsyma6BQYgUeQGoUNuGvXwm rrAQIpfKligAJGDzptHVzFe05BkFWTYoj0KMNA1nMZH6n6Jbr02MQKS4 bT60nC+B3a51965f1T9yy9pb8ZEeQGWllLAIBQmA4Z5XuNUeuwcRnKez +gepGCaTS0vlDKgYHCxxh9Ynky8tk6qfi7AFMxU94cpdbjj9gUruhu7S PDWfVQ==
+;; Received 525 bytes from 8.8.8.8#53(8.8.8.8) in 60 ms</code></pre><blockquote>
+<p>根域名服务器是 DNS 中最高级别的域名服务器，这些服务器负责返回顶级域的权威域名服务器地址，这些域名服务器的数量总共有 13 组，域名的格式从上面返回的结果可以看到是 .root-servers.net，每个根域名服务器中只存储了顶级域服务器的 IP 地址，大小其实也只有 2MB 左右，虽然域名服务器总共只有 13 组，但是每一组服务器都通过提供了镜像服务，全球大概也有几百台的根域名服务器在运行。</p>
+</blockquote>
+<p>在这里，我们获取到了以下的 5 条 NS 记录，也就是 5 台 me. 定义域名 DNS 服务器：</p>
+<pre><code>me.            172800    IN    NS    b2.nic.me.
+me.            172800    IN    NS    b0.nic.me.
+me.            172800    IN    NS    a2.nic.me.
+me.            172800    IN    NS    a0.nic.me.
+me.            172800    IN    NS    c0.nic.me.
+me.            86400    IN    DS    2569 7 2 94E798106F033500E67567B197AE9132C0E916764DC743C55A9ECA3C 7BF559E2
+me.            86400    IN    DS    2569 7 1 09BA1EB4D20402620881FD9848994417800DB26A
+me.            86400    IN    RRSIG    DS 8 1 86400 20190717050000 20190704040000 59944 . gIH0DmX2Eq888IbHWYBVay5CFKCsabc4MQkqY4cYv6C63R0C7idoiGHb Y3452XCXWl+znsdsykAR99Q1Nl/CfvVMR6dmh5wIwVX98Y2cXtXh0WSE tEK6o5/Ovw+o81tRBHINXVaMX8bOvu0Voha4ZICHBPxfANiezNUk1aVh H+X6oRFRuTPZSEUbQWpaYt3I71IvrPr+2/AHdmGOQZke8d+F0QGcHvmU Nm3g0gdsKm+f0LtlhcvKPdMlOJUas9XvH1MbNtgdGR6V7U7o7kExEylk 1PDPPsOkUwrmUBi++B63z0G13fg7N6OaOduxhmekuf4MrJevzVngrcFi b9cqGA==
+;; Received 721 bytes from 202.12.27.33#53(m.root-servers.net) in 146 ms</code></pre><p>当 DNS 解析器从根域名服务器中查询到了顶级域名 .me 服务器的地址之后，就可以访问这些顶级域名服务器其中的一台 b2.nic.me 获取权威 DNS 的服务器的地址了：</p>
+<pre><code>draveness.me.        86400    IN    NS    f1g1ns1.dnspod.net.
+draveness.me.        86400    IN    NS    f1g1ns2.dnspod.net.
+fsip6fkr2u8cf2kkg7scot4glihao6s1.me. 8400 IN NSEC3 1 1 1 D399EAAB FSJJ1I3A2LHPTHN80MA6Q7J64B15AO5K  NS SOA RRSIG DNSKEY NSEC3PARAM
+fsip6fkr2u8cf2kkg7scot4glihao6s1.me. 8400 IN RRSIG NSEC3 7 2 8400 20190725061449 20190704051449 30833 me. pRmVHRNWL+1Q/JPlykpTcS5vsEqtLphYvl0oiM8iUew6+BQ3qqxesT0i +QZhjHGPYpT0xSJGApkPjVrAR3yTAJ+Whfqed42IIyeqXDQHqyNRSY7j L82DtGJOsgo2iAQSH0p37dXfRB07vD+gGW9mFQhGkoouNQHblszs9EGm 8hE=
+qcvpe8vm2lk766men9kdu219ab0ecspb.me. 8400 IN NSEC3 1 1 1 D399EAAB QD55FUHDCIK176LK79LSGCKL1ERSOSU5  NS DS RRSIG
+qcvpe8vm2lk766men9kdu219ab0ecspb.me. 8400 IN RRSIG NSEC3 7 2 8400 20190722152308 20190701142308 30833 me. ZZPeQAjn+I2q7qr4APV9CRHuwSKlhIK5sZwbkLUYY8Tj7S2rByZuY52U L/pxi1rEFrutWBftYXas2ZAKte21fIwYhFOnknZomPi5cSM0NkhQKmc+ LpmDAw/4EtIzNLGbFeCsAcDE0hclIh10VxqUBjWNdZpKu4lXQpt43odT LnQ=
+;; Received 586 bytes from 199.249.127.1#53(b2.nic.me) in 161 ms</code></pre><p>这里的权威 DNS 服务是作者在域名提供商进行配置的，当有客户端请求 draveness.me 域名对应的 IP 地址时，其实会从作者使用的 DNS 服务商 DNSPod 处请求服务的 IP 地址：</p>
+<pre><code>draveness.me.        600    IN    A    139.180.201.138
+draveness.me.        86400    IN    NS    f1g1ns1.dnspod.net.
+draveness.me.        86400    IN    NS    f1g1ns2.dnspod.net.
+;; Received 121 bytes from 14.215.155.170#53(f1g1ns1.dnspod.net) in 60 ms</code></pre><p>最终，DNS 解析器从 f1g1ns1.dnspod.net 服务中获取了当前博客的 IP 地址 139.180.201.138，浏览器或者其他设备就能够通过 IP 向服务器获取请求的内容了。</p>
+<p>从整个解析过程，我们可以看出 DNS 域名服务器大体分成三类，根域名服务、顶级域名服务以及权威域名服务三种，获取域名对应的 IP 地址时，也会像遍历一棵树一样按照从顶层到底层的顺序依次请求不同的服务器。</p>
+<h2 id="胶水记录"><a href="#胶水记录" class="headerlink" title="胶水记录"></a>胶水记录</h2><p>在通过服务器解析域名的过程中，我们看到当请求 me. 顶级域名服务器的时候，其实返回了 b0.nic.me 等域名：</p>
+<pre><code>me.            172800    IN    NS    b2.nic.me.
+me.            172800    IN    NS    b0.nic.me.
+me.            172800    IN    NS    a2.nic.me.
+me.            172800    IN    NS    a0.nic.me.
+me.            172800    IN    NS    c0.nic.me.</code></pre><p>就像我们最开始说的，在互联网中想要请求服务，最终一定需要获取 IP 提供服务的服务器的 IP 地址；同理，作为 b0.nic.me 作为一个 DNS 服务器，我也必须获取它的 IP 地址才能获得次级域名的 DNS 信息，但是这里就陷入了一种循环：</p>
+<ol>
+<li>如果想要获取 dravenss.me 的 IP 地址，就需要访问 .me 顶级域名服务器 b0.nic.me</li>
+<li>如果想要获取 b0.nic.me 的 IP 地址，就需要访问 me 顶级域名服务器 b0.nic.me</li>
+<li>如果想要获取 b0.nic.me 的 IP 地址，就需要访问 me 顶级域名服务器 b0.nic.me</li>
+<li>…</li>
+</ol>
+<p>为了解决这一个问题，我们引入了胶水记录（Glue Record）这一概念，也就是在出现循环依赖时，直接在上一级作用域返回 DNS 服务器的 IP 地址：</p>
+<pre><code>$ dig +trace +additional draveness.me
+
+...
+
+me.            172800    IN    NS    a2.nic.me.
+me.            172800    IN    NS    b2.nic.me.
+me.            172800    IN    NS    b0.nic.me.
+me.            172800    IN    NS    a0.nic.me.
+me.            172800    IN    NS    c0.nic.me.
+me.            86400    IN    DS    2569 7 1 09BA1EB4D20402620881FD9848994417800DB26A
+me.            86400    IN    DS    2569 7 2 94E798106F033500E67567B197AE9132C0E916764DC743C55A9ECA3C 7BF559E2
+me.            86400    IN    RRSIG    DS 8 1 86400 20181116050000 20181103040000 2134 . cT+rcDNiYD9X02M/NoSBombU2ZqW/7WnEi+b/TOPcO7cDbjb923LltFb ugMIaoU0Yj6k0Ydg++DrQOy6E5eeshughcH/6rYEbVlFcsIkCdbd9gOk QkOMH+luvDjCRdZ4L3MrdXZe5PJ5Y45C54V/0XUEdfVKel+NnAdJ1gLE F+aW8LKnVZpEN/Zu88alOBt9+FPAFfCRV9uQ7UmGwGEMU/WXITheRi5L h8VtV9w82E6Jh9DenhVFe2g82BYu9MvEbLZr3MKII9pxgyUE3pt50wGY Mhs40REB0v4pMsEU/KHePsgAfeS/mFSXkiPYPqz2fgke6OHFuwq7MgJk l7RruQ==
+a0.nic.me.        172800    IN    A    199.253.59.1
+a2.nic.me.        172800    IN    A    199.249.119.1
+b0.nic.me.        172800    IN    A    199.253.60.1
+b2.nic.me.        172800    IN    A    199.249.127.1
+c0.nic.me.        172800    IN    A    199.253.61.1
+a0.nic.me.        172800    IN    AAAA    2001:500:53::1
+a2.nic.me.        172800    IN    AAAA    2001:500:47::1
+b0.nic.me.        172800    IN    AAAA    2001:500:54::1
+b2.nic.me.        172800    IN    AAAA    2001:500:4f::1
+c0.nic.me.        172800    IN    AAAA    2001:500:55::1
+;; Received 721 bytes from 192.112.36.4#53(g.root-servers.net) in 110 ms</code></pre><p>也就是同时返回 NS 记录和 A（或 AAAA） 记录，这样就能够解决域名解析出现的循环依赖问题。</p>
+<h4 id="如果本地双dns时，何时会走备DNS"><a href="#如果本地双dns时，何时会走备DNS" class="headerlink" title="如果本地双dns时，何时会走备DNS"></a>如果本地双dns时，何时会走备DNS</h4><p>1、主dns返回超时或查询不存在；</p>
+<p>2、主dns本身在一定时间内未反馈；（有可能会再次向主dns查询）</p>
+<p>3、如果上一次是备dns给出反馈，那么下一次查询首先会向备dns查询，而不是理解中的一直是向主dns查询。</p>
+<h4 id="UDP报文格式"><a href="#UDP报文格式" class="headerlink" title="UDP报文格式"></a>UDP报文格式</h4><p><img src="http://note.youdao.com/yws/res/1500/F0C2AD23548E48BA9BBA7B6691275FAD" alt="image"></p>
+<p>ID：2字节，标识符，通过随机数标识该请求。</p>
+<p>Flags：2字节，标志位设置</p>
+<pre><code>               第1位：msg类型，0为请求（query）              1为响应（response）。
+
+               第2-5位：opcode，查询种类，0000表示标准query。
+
+               第6位：是否权威应答 （应答时才有意义）。
+
+               第7位：因为一个UDP报文为512字节，所以该位指示是否截断超过的部分。
+
+               第8位：是否请求递归（这个比特位被请求设置，应答的时候使用的相同的值返                    回）。
+
+                第9位：由DNS回复返回指定，说明DNS服务器是否支持递归查询（这个比特位                     在应答中设置或取消）。
+
+               第10-12位：保留位（设置为0）。
+
+
+
+               第13-16位：应答码（0：没有错误，1： 格式错误，2：服务器错误，3：名字错误，4：服务器不支持，5：拒绝，6-15：保留值）。</code></pre><p>Questions：2字节，报文请求段中的问题记录数；</p>
+<p>AnswerRRs：2字节，报文回答段中的回答记录数；</p>
+<p>AuthorityRRs：2字节，报文授权段中的授权记录数；</p>
+<p>AdditionalRRs：2字节，报文附加段中的附加记录数；</p>
+<p>Queries：查询请求内容（响应时不变即可）</p>
+<pre><code>               Name：不定长，域名（例子：www.baidu.com需写作： 3www5baidu3com0）。
+
+               Type：2字节查询的资源记录类型。
+
+               Class：2字节指定信息的协议组。</code></pre><p>Answers：查询响应内容，可以有0-n条（请求时为空即可）</p>
+<pre><code>               Name：2字节（压缩编码）指向name第一次出现的地址且前两个bit为11
+
+               Type：2字节响应类型。
+
+               Class：2字节
+
+               TTL：4字节
+
+               Datalength：2字节，指接下来的data长度，单位为字节。
+
+               Address/CNAME：4字节地址/不定长域名</code></pre><p>Authoritativenameservers：</p>
+<pre><code>               Name：2字节（压缩编码）指向name第一次出现的地址且前两个bit为11
+
+               Type：2字节响应类型。此处为2（NS）
+
+               Class：2字节
+
+               TTL：4字节
+
+               Datalength：2字节，指接下来的data长度，单位为字节。
+
+               nameserver：此处为6字节，表示的，表示方法待研究。</code></pre><p>Additionalrecords：</p>
+<pre><code>               Name：2字节（压缩编码）指向name第一次出现的地址且前两个bit为11
+
+               Type：2字节响应类型。
+
+               Class：2字节，表示类型
+
+               TTL：4字节
+
+               Datalength：2字节，指接下来的data长度，单位为字节。
+
+               Address：此处为4字节地址</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/DNS/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">DNS</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+
+		
+		
+			<a href="/2019/08/21/CoreDns源码解析/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="CoreDns源码分析">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/wechat.JPG">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://lwydyby.cn/2019/08/21/DNS原理/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+      <article class="blog-post-block blog-post-page-content" style="margin-top:2.5em;">
+      
+      <div class="comment"></div>
+      <script>
+          new Valine({
+              av: AV, // source from av-min.js
+              el: '.comment' ,
+              notify:false, // 邮件提醒 v1.1.4新增
+              verify:false, // 验证码 v1.1.4新增
+              app_id: 'iJmUXc8LaoLWImgBPMXEIduG-gzGzoHsz',
+              app_key: 'LO8xrIFyiXfO58Irvj2UAW2l',
+              placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+              path:window.location.pathname // 路径配置 v1.1.5新增，可填window.location.href
+          });
+      </script>
+      </article>
+      
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://lwydyby.cn">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">63</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">3</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                      <li><a href="/tags/DNS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="DNS">DNS</a></li>
+                    
+                      <li><a href="/tags/CoreDns-GoLang/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CoreDns GoLang">CoreDns GoLang</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/live2d-widget@^3.1.3/lib/L2Dwidget.min.js"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"width":150,"height":300,"position":"right"},"mobile":{"show":false,"scale":0.05},"react":{"opacityDefault":1,"opacityOnHover":0.2},"log":false});</script></body>
+</html>

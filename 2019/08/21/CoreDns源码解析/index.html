@@ -1,0 +1,694 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="cn">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>CoreDns源码分析万万没想到</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'iJmUXc8LaoLWImgBPMXEIduG-gzGzoHsz',appKey:'LO8xrIFyiXfO58Irvj2UAW2l'});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="http://lwydyby.cn" class="blog-header-mobile-title">万万没想到</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="http://lwydyby.cn" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="https://gitee.com/lwydyby" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>CoreDns源码分析</h4>
+    <time datetime="2019-08-21T02:32:36.000Z"><i class="fa fa-clock-o"></i>2019-08-21</time>
+    
+    
+    
+    
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <ol>
+<li>首先main方法在coredns.go内，因为这个文件导入了core/plugin.go,而core/plugin.go内导入了所有插件，所以会执行所有插件的init方法,每个插件的init方法功能都一样，就是把自己注册为caddy中名为”dns” 的server的plugin</li>
+</ol>
+<p>coredns.go</p>
+<pre><code>import (
+    &quot;github.com/coredns/coredns/coremain&quot;
+
+    // Plug in CoreDNS
+    _ &quot;github.com/coredns/coredns/core/plugin&quot;
+)
+
+func main() {
+    coremain.Run()
+}</code></pre><pre><code>package plugin
+
+import (
+    // Include all plugins.
+    _ &quot;github.com/caddyserver/caddy/onevent&quot;
+    _ &quot;github.com/coredns/coredns/plugin/any&quot;
+    _ &quot;github.com/coredns/coredns/plugin/auto&quot;
+    _ &quot;github.com/coredns/coredns/plugin/autopath&quot;
+    _ &quot;github.com/coredns/coredns/plugin/bind&quot;
+    ....</code></pre><pre><code>func init() {
+    caddy.RegisterPlugin(&quot;any&quot;, caddy.Plugin{
+        ServerType: &quot;dns&quot;,
+        Action:     setup,
+    })
+}</code></pre><ol start="2">
+<li>然后main 方法内就一行，运行coremain/run.go内的Run方法,因为这个文件导入了core/dnsserver/register.go,因此会执行该文件的init方法，该方法通过caddy.RegisterServerType 注册了”dns”类型的sever的context,这里有两个参数，一个是Directives，是个string列表，包含了所有的插件名称，还有一个newContext，是初始化context的</li>
+</ol>
+<p>run.go</p>
+<pre><code>import (
+    ...
+    &quot;github.com/coredns/coredns/core/dnsserver&quot;
+    ...
+)
+</code></pre><p>register.go</p>
+<pre><code>func init() {
+    flag.StringVar(&amp;Port, serverType+&quot;.port&quot;, DefaultPort, &quot;Default port&quot;)
+
+    caddy.RegisterServerType(serverType, caddy.ServerType{
+        Directives: func() []string { return Directives },
+        DefaultInput: func() caddy.Input {
+            return caddy.CaddyfileInput{
+                Filepath:       &quot;Corefile&quot;,
+                Contents:       []byte(&quot;.:&quot; + Port + &quot; {\nwhoami\n}\n&quot;),
+                ServerTypeName: serverType,
+            }
+        },
+        NewContext: newContext,
+    })
+}</code></pre><ol start="3">
+<li>coremain/run.go内的Run方法内开始执行caddy.LoadCaddyfile 加载配置文件，然后执行caddy.start方法，这个方法内会进行一系列初始化，主要会处理1，2注册的server</li>
+</ol>
+<pre><code>func Run() {
+    caddy.TrapSignals()
+
+    // Reset flag.CommandLine to get rid of unwanted flags for instance from glog (used in kubernetes).
+    // And read the ones we want to keep.
+    flag.VisitAll(func(f *flag.Flag) {
+        if _, ok := flagsBlacklist[f.Name]; ok {
+            return
+        }
+        flagsToKeep = append(flagsToKeep, f)
+    })
+
+    flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+    for _, f := range flagsToKeep {
+        flag.Var(f.Value, f.Name, f.Usage)
+    }
+
+    flag.Parse()
+
+    if len(flag.Args()) &gt; 0 {
+        mustLogFatal(fmt.Errorf(&quot;extra command line arguments: %s&quot;, flag.Args()))
+    }
+
+    log.SetOutput(os.Stdout)
+    log.SetFlags(0) // Set to 0 because we&#39;re doing our own time, with timezone
+
+    if version {
+        showVersion()
+        os.Exit(0)
+    }
+    if plugins {
+        fmt.Println(caddy.DescribePlugins())
+        os.Exit(0)
+    }
+
+    // Get Corefile input
+    corefile, err := caddy.LoadCaddyfile(serverType)
+    if err != nil {
+        mustLogFatal(err)
+    }
+
+    // Start your engines
+    instance, err := caddy.Start(corefile)
+    if err != nil {
+        mustLogFatal(err)
+    }
+
+    logVersion()
+    if !dnsserver.Quiet {
+        showVersion()
+    }
+
+    // Twiddle your thumbs
+    instance.Wait()
+}</code></pre><p>注：配置文件见coredns部署篇</p>
+<ul>
+<li>根据第二步中的newContext初始化dnsContext</li>
+<li>其次会执行caddy内部的ValidateAndExecuteDirectives方法，该方法的主要是根据第二步注册的Directives和配置文件 依次调用配置文件启用的每个插件的setup()，把启用的插件注册为dnsContext.Plugin</li>
+</ul>
+<pre><code>func setup(c *caddy.Controller) error {
+    a := Any{}
+
+    dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
+        a.Next = next
+        return a
+    })
+
+    return nil
+}</code></pre><ul>
+<li>然后执行Context.InspectServerBlock()和Context.MakerServers(),即coremain/dnsserver/register.go内的dnsContext的两个方法，起作用分别是加载配置文件,注册pluginChain并返回该Server</li>
+</ul>
+<pre><code>// InspectServerBlocks make sure that everything checks out before
+// executing directives and otherwise prepares the directives to
+// be parsed and executed.
+func (h *dnsContext) InspectServerBlocks(sourceFile string, serverBlocks []caddyfile.ServerBlock) ([]caddyfile.ServerBlock, error) {
+    // Normalize and check all the zone names and check for duplicates
+    for ib, s := range serverBlocks {
+        for ik, k := range s.Keys {
+            za, err := normalizeZone(k)
+            if err != nil {
+                return nil, err
+            }
+            s.Keys[ik] = za.String()
+            // Save the config to our master list, and key it for lookups.
+            cfg := &amp;Config{
+                //DNS区域(ZONE)：DNS域名空间中连续的树，将域名空间按照需要划分为若干较小的管理单位。
+                Zone:        za.Zone,
+                ListenHosts: []string{&quot;&quot;},
+                Port:        za.Port,
+                Transport:   za.Transport,
+            }
+            keyConfig := keyForConfig(ib, ik)
+            if za.IPNet == nil {
+                h.saveConfig(keyConfig, cfg)
+                continue
+            }
+
+            ones, bits := za.IPNet.Mask.Size()
+            if (bits-ones)%8 != 0 { // only do this for non-octet boundaries
+                cfg.FilterFunc = func(s string) bool {
+                    // TODO(miek): strings.ToLower! Slow and allocates new string.
+                    addr := dnsutil.ExtractAddressFromReverse(strings.ToLower(s))
+                    if addr == &quot;&quot; {
+                        return true
+                    }
+                    return za.IPNet.Contains(net.ParseIP(addr))
+                }
+            }
+            h.saveConfig(keyConfig, cfg)
+        }
+    }
+    return serverBlocks, nil
+}</code></pre><pre><code>// MakeServers uses the newly-created siteConfigs to create and return a list of server instances.
+func (h *dnsContext) MakeServers() ([]caddy.Server, error) {
+
+    // Now that all Keys and Directives are parsed and initialized
+    // lets verify that there is no overlap on the zones and addresses to listen for
+    errValid := h.validateZonesAndListeningAddresses()
+    if errValid != nil {
+        return nil, errValid
+    }
+
+    // we must map (group) each config to a bind address
+    groups, err := groupConfigsByListenAddr(h.configs)
+    if err != nil {
+        return nil, err
+    }
+    // then we create a server for each group
+    var servers []caddy.Server
+    for addr, group := range groups {
+        // switch on addr
+        switch tr, _ := parse.Transport(addr); tr {
+        case transport.DNS:
+            s, err := NewServer(addr, group)
+            if err != nil {
+                return nil, err
+            }
+            servers = append(servers, s)
+
+        case transport.TLS:
+            s, err := NewServerTLS(addr, group)
+            if err != nil {
+                return nil, err
+            }
+            servers = append(servers, s)
+
+        case transport.GRPC:
+            s, err := NewServergRPC(addr, group)
+            if err != nil {
+                return nil, err
+            }
+            servers = append(servers, s)
+
+        case transport.HTTPS:
+            s, err := NewServerHTTPS(addr, group)
+            if err != nil {
+                return nil, err
+            }
+            servers = append(servers, s)
+        }
+
+    }
+
+    return servers, nil
+}
+</code></pre><ul>
+<li>调用Server的Lisen或ListenPacket方法，即core/dnsserver/server.go内的Server两个方法，启动TCP或者UDP监听</li>
+</ul>
+<pre><code>// Listen implements caddy.TCPServer interface.
+func (s *Server) Listen() (net.Listener, error) {
+    l, err := listen(&quot;tcp&quot;, s.Addr[len(transport.DNS+&quot;://&quot;):])
+    if err != nil {
+        return nil, err
+    }
+    return l, nil
+}
+
+// ListenPacket implements caddy.UDPServer interface.
+func (s *Server) ListenPacket() (net.PacketConn, error) {
+    p, err := listenPacket(&quot;udp&quot;, s.Addr[len(transport.DNS+&quot;://&quot;):])
+    if err != nil {
+        return nil, err
+    }
+
+    return p, nil
+}
+</code></pre><ul>
+<li>调core/dnsserver/server.go内Server或ServePacket方法注册处理TCP或者UDP请求的Handle,这两个方法都会注册ServeDNS方法为Handle</li>
+</ul>
+<pre><code>// ServePacket starts the server with an existing packetconn. It blocks until the server stops.
+// This implements caddy.UDPServer interface.
+func (s *Server) ServePacket(p net.PacketConn) error {
+    s.m.Lock()
+    s.server[udp] = &amp;dns.Server{PacketConn: p, Net: &quot;udp&quot;, Handler: dns.HandlerFunc(func(w dns.ResponseWriter, r *dns.Msg) {
+        ctx := context.WithValue(context.Background(), Key{}, s)
+        s.ServeDNS(ctx, w, r)
+    })}
+    s.m.Unlock()
+
+    return s.server[udp].ActivateAndServe()
+}</code></pre><ol start="4">
+<li>执行caddy.Wait()主进程进入等待，caddy开始处理请求，这里每个请求都会发送给core/dnsserver/server.go的ServeDNS处理，这里是dns的总逻辑</li>
+</ol>
+<ul>
+<li>遍历 dns.NextLabel(dns)，找到匹配的zone，都未匹配则尝试默认zone(“.”)</li>
+<li>调用zone.pluginChain.ServeDNS()进行处理，pluginChain是一个链，链的顺序是core/dnsserver/zdirectives.go 定义的，最前的最先执行。</li>
+</ul>
+<pre><code>func (s *Server) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) {
+  .....
+  // Wildcard match, if we have found nothing try the root zone as a last resort.
+    if h, ok := s.zones[&quot;.&quot;]; ok &amp;&amp; h.pluginChain != nil {
+        rcode, _ := h.pluginChain.ServeDNS(ctx, w, r)
+        if !plugin.ClientWrite(rcode) {
+            errorFunc(s.Addr, w, r, rcode)
+        }
+        return
+    }
+}
+</code></pre><p>顺序:</p>
+<pre><code>var Directives = []string{
+    &quot;metadata&quot;,
+    &quot;cancel&quot;,
+    &quot;tls&quot;,
+    &quot;reload&quot;,
+    &quot;nsid&quot;,
+    &quot;root&quot;,
+    &quot;bind&quot;,
+    &quot;debug&quot;,
+    &quot;trace&quot;,
+    &quot;ready&quot;,
+    &quot;health&quot;,
+    &quot;pprof&quot;,
+    &quot;prometheus&quot;,
+    &quot;errors&quot;,
+    &quot;log&quot;,
+    &quot;dnstap&quot;,
+    &quot;any&quot;,
+    &quot;chaos&quot;,
+    &quot;loadbalance&quot;,
+    &quot;cache&quot;,
+    &quot;rewrite&quot;,
+    &quot;dnssec&quot;,
+    &quot;autopath&quot;,
+    &quot;template&quot;,
+    &quot;hosts&quot;,
+    &quot;route53&quot;,
+    &quot;federation&quot;,
+    &quot;k8s_external&quot;,
+    &quot;kubernetes&quot;,
+    &quot;file&quot;,
+    &quot;auto&quot;,
+    &quot;secondary&quot;,
+    &quot;etcd&quot;,
+    &quot;loop&quot;,
+    &quot;forward&quot;,
+    &quot;grpc&quot;,
+    &quot;erratic&quot;,
+    &quot;whoami&quot;,
+    &quot;on&quot;,
+}
+</code></pre><ol start="5">
+<li>每个插件的ServeDNS()会进行如下处理</li>
+</ol>
+<ul>
+<li>进行一些插件自定义处理</li>
+<li>调用plugin.NextOrFailure()执行下个插件的处理（当然也可以不调用直接返回）<br>进行一些插件自定义处理</li>
+</ul>
+<pre><code>// ServeDNS implements the plugin.Handler interface.
+func (rr RoundRobin) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
+    wrr := &amp;RoundRobinResponseWriter{w}
+    return plugin.NextOrFailure(rr.Name(), rr.Next, ctx, wrr, r)
+}</code></pre>
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/CoreDns-GoLang/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CoreDns GoLang</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2019/08/21/DNS原理/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="DNS原理">上一篇</a>
+		
+
+		
+		
+			<a href="/2019/06/21/spring cloud 网卡选择/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="spring cloud 网卡选择">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/alipay.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/wechat.JPG">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="/img/wechat.JPG">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://lwydyby.cn/2019/08/21/CoreDns源码解析/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+      <article class="blog-post-block blog-post-page-content" style="margin-top:2.5em;">
+      
+      <div class="comment"></div>
+      <script>
+          new Valine({
+              av: AV, // source from av-min.js
+              el: '.comment' ,
+              notify:false, // 邮件提醒 v1.1.4新增
+              verify:false, // 验证码 v1.1.4新增
+              app_id: 'iJmUXc8LaoLWImgBPMXEIduG-gzGzoHsz',
+              app_key: 'LO8xrIFyiXfO58Irvj2UAW2l',
+              placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!',
+              path:window.location.pathname // 路径配置 v1.1.5新增，可填window.location.href
+          });
+      </script>
+      </article>
+      
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="http://lwydyby.cn">万万没想到</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>万万没想到</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://avatar.gitee.com/uploads/38/1463938_lwydyby.png!avatar100?1517911156">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">63</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">3</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href="https://github.com/lwydyby" class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:qzywyd@163.com" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/CSDN迁移/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CSDN迁移">CSDN迁移</a></li>
+                    
+                      <li><a href="/tags/DNS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="DNS">DNS</a></li>
+                    
+                      <li><a href="/tags/CoreDns-GoLang/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CoreDns GoLang">CoreDns GoLang</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/live2d-widget@^3.1.3/lib/L2Dwidget.min.js"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"scale":1,"hHeadPos":0.5,"vHeadPos":0.618,"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"width":150,"height":300,"position":"right"},"mobile":{"show":false,"scale":0.05},"react":{"opacityDefault":1,"opacityOnHover":0.2},"log":false});</script></body>
+</html>
