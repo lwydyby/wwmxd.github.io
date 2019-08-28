@@ -20,7 +20,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
   <meta name="renderer" content="webkit">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
-  <title>优雅的关闭vertx万万没想到</title>
+  <title>nova-scheduler select-destination源码梳理万万没想到</title>
   <link rel="shortcut icon" href>
   
     
@@ -109,8 +109,8 @@
             </header>
                 
 <header class="blog-post-page-title">
-    <h4>优雅的关闭vertx</h4>
-    <time datetime="2019-05-30T09:55:40.000Z"><i class="fa fa-clock-o"></i>2019-05-30</time>
+    <h4>nova-scheduler select-destination源码梳理</h4>
+    <time datetime="2018-08-28T08:35:49.000Z"><i class="fa fa-clock-o"></i>2018-08-28</time>
     
     
     
@@ -122,81 +122,118 @@
     <article class="blog-post-block blog-post-page-content">
         <section>
             
-                <p> <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> </a> 版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 by-sa </a>版权协议，转载请附上原文出处链接和本声明。  本文链接：<a href="https://blog.csdn.net/qq_36752632/article/details/90702158" target="_blank" rel="noopener">https://blog.csdn.net/qq_36752632/article/details/90702158</a>   </p>
-<p>  <strong>00 前言</strong></p>
-<p> 什么叫优雅停机？简单说就是，在对应用进程发送停止指令之后，能保证正在执行的业务操作不受影响。应用接收到停止指令之后的步骤应该是，停止接收访问请求，等待已经接收到的请求处理完成，并能成功返回，这时才真正停止应用。<br> 这种完美的应用停止方式如何实现呢？就Java语言生态来说，底层的技术是支持的，所以我们才能实现在Java语言之上的各个web容器的优雅停机。<br> 在普通的外置的tomcat中，有shutdown脚本提供优雅的停机机制，但是我们在使用Spring boot的过程中发现web容器都是内置（当然也可使用外置，但是不推荐），这种方式提供简单的应用启动方式，方便的管理机制，非常适用于微服务应用中，但是默认没有提供优雅停机的方式。这也是本文探索这个问题的根本原因。<br> 应用是否是实现了优雅停机，如何才能验证呢？这需要一个处理时间较长的业务逻辑，模拟这样的逻辑应该很简单，使用线程sleep或者长时间循环。我的模拟业务逻辑代码如下：</p>
-<pre><code>@GetMapping(value = &quot;/sleep/one&quot;, produces = &quot;application/json&quot;)
-public ResultEntity&lt;Long&gt; sleepOne(String systemNo){
-    logger.info(&quot;模拟业务处理1分钟，请求参数：{}&quot;, systemNo);
-    Long serverTime = System.currentTimeMillis();
-//        try {
-//            Thread.sleep(60*1000L);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-    while (System.currentTimeMillis() &lt; serverTime + (60 * 1000)){
-        logger.info(&quot;正在处理业务，当前时间：{}，开始时间：{}&quot;, System.currentTimeMillis(), serverTime);
-    }
-    ResultEntity&lt;Long&gt; resultEntity = new ResultEntity&lt;&gt;(serverTime);
-    logger.info(&quot;模拟业务处理1分钟，响应参数：{}&quot;, resultEntity);
-    return resultEntity;
-}
-</code></pre><p> 验证方式就是，在触发这个接口的业务处理之后，业务逻辑处理时间长达1分钟，需要在处理结束前，发起停止指令，验证是否能够正常返回。验证时所使用的kill指令：kill -2（Ctrl + C）、kill -15、kill -9。</p>
-<p> <strong>01 Java 语言的优雅停机</strong></p>
-<p> 从上面的介绍中我们发现，Java语言本身是支持优雅停机的，这里就先介绍一下普通的java应用是如何实现优雅停止的。<br> 当我们使用kill PID的方式结束一个Java应用的时候，JVM会收到一个停止信号，然后执行shutdownHook的线程。一个实现示例如下：</p>
-<pre><code>public class ShutdownHook extends Thread {
-    private Thread mainThread;
-    private boolean shutDownSignalReceived;
+                <h3 id="scheduler的调度流程"><a href="#scheduler的调度流程" class="headerlink" title="scheduler的调度流程"></a>scheduler的调度流程</h3><p>注： 源码可以从~/nava/scheduler/managert.py （select_destinations）开始</p>
+<p>scheduler从接受到rpc调用开始，所经历的流程大概如下图所示：</p>
+<p><img src="https://i.loli.net/2019/08/28/TmWhFIUfzQ5wknZ.png" alt="调用流程"></p>
+<ol>
+<li>对rpc传过来的request_spec参数进行优化（这一步是S版后才有的，为了配合nova-api表中的聚合关系，进行预先的筛选，减少后边查找的范围）</li>
+</ol>
+<pre><code>        if self.driver.USES_ALLOCATION_CANDIDATES and not is_rebuild:
+            # Only process the Placement request spec filters when Placement
+            # is used.
+            try:
+                request_filter.process_reqspec(ctxt, spec_obj)
+            except exception.RequestFilterFailed as e:
+                raise exception.NoValidHost(reason=e.message)</code></pre><pre><code>def process_reqspec(ctxt, request_spec):
+    &quot;&quot;&quot;Process an objects.ReqestSpec before calling placement.
 
-    @Override
-    public void run() {
-        System.out.println(&quot;Shut down signal received.&quot;);
-        this.shutDownSignalReceived=true;
-        mainThread.interrupt();
-        try {
-            mainThread.join(); //当收到停止信号时，等待mainThread的执行完成
-        } catch (InterruptedException e) {
-        }
-        System.out.println(&quot;Shut down complete.&quot;);
-    }
+    :param ctxt: A RequestContext
+    :param request_spec: An objects.RequestSpec to be inspected/modified
+    &quot;&quot;&quot;
+    for filter in ALL_REQUEST_FILTERS:
+        filter(ctxt, request_spec)
+</code></pre><p>目前包含的4个filter为：</p>
+<pre><code>ALL_REQUEST_FILTERS = [
+    require_tenant_aggregate,
+    map_az_to_placement_aggregate,
+    require_image_type_support,
+    compute_status_filter,
+]</code></pre><ol start="2">
+<li>将request_spec翻译为placement所需的查询格式并查询符合的资源集合</li>
+</ol>
+<pre><code>resources = utils.resources_from_request_spec(
+                ctxt, spec_obj, self.driver.host_manager)
+res = self.placement_client.get_allocation_candidates(ctxt,resources)</code></pre><ol start="3">
+<li>根据资源集合去查找相应的hoststate(查询的表为：compute_node,services,instance,cell_mapping)</li>
+</ol>
+<pre><code>
+selections = self.driver.select_destinations(ctxt, spec_obj,
+        instance_uuids, alloc_reqs_by_rp_uuid, provider_summaries,
+        allocation_request_version, return_alternates)</code></pre><p>从这一步开始进入到/nova/scheduler/filter_cheduler.py的select_destinations方法</p>
+<pre><code> elevated = context.elevated()
 
-    public ShutdownHook(Thread mainThread) {
-        super();
-        this.mainThread = mainThread;
-        this.shutDownSignalReceived = false;
-        Runtime.getRuntime().addShutdownHook(this);
-    }
+ hosts = self._get_all_host_states(elevated, spec_obj,
+    provider_summaries)</code></pre><ol start="4">
+<li>对hoststate进行过滤和打分，获得符合条件并排好序的hoststate</li>
+</ol>
+<pre><code>        for num, instance_uuid in enumerate(instance_uuids):
+            # In a multi-create request, the first request spec from the list
+            # is passed to the scheduler and that request spec&#39;s instance_uuid
+            # might not be the same as the instance we&#39;re processing, so we
+            # update the instance_uuid in that case before passing the request
+            # spec to filters since at least one filter
+            # (ServerGroupAntiAffinityFilter) depends on that information being
+            # accurate.
+            spec_obj.instance_uuid = instance_uuid
+            # Reset the field so it&#39;s not persisted accidentally.
+            spec_obj.obj_reset_changes([&#39;instance_uuid&#39;])
 
-    public boolean shouldShutDown(){
-        return shutDownSignalReceived;
-    }
+            hosts = self._get_sorted_hosts(spec_obj, hosts, num)</code></pre><p>这里的instance_uuids是rpc传过来的，相当于创建几个虚机就有几个instance_uuid<br>并且这里获得的是一个集合，最优的在第一个</p>
+<p>5.对hoststate从最优开始进行claim操作，如果成功则跳出，更新hoststate并继续下一个虚拟机的创建（回到第4步重新排序）这里的claim操作只是对placement中的资源进行校验和更新</p>
+<pre><code>claimed_host = None
+            for host in hosts:
+                cn_uuid = host.uuid
+                if cn_uuid not in alloc_reqs_by_rp_uuid:
+                    msg = (&quot;A host state with uuid = &#39;%s&#39; that did not have a &quot;
+                           &quot;matching allocation_request was encountered while &quot;
+                           &quot;scheduling. This host was skipped.&quot;)
+                    LOG.debug(msg, cn_uuid)
+                    continue
 
-}
-</code></pre><p> 其中关键语句Runtime.getRuntime().addShutdownHook(this);，注册一个JVM关闭的钩子，这个钩子可以在以下几种场景被调用：</p>
-<p> 程序正常退出<br> 使用System.exit()<br> 终端使用Ctrl+C触发的中断<br> 系统关闭<br> 使用Kill pid命令干掉进程</p>
-<p> <strong>02 vertx的优雅停机</strong><br> vertx本身的close方法已经实现了他的优雅停机，我们只需保证java进程在vertx close结束后关闭即可，所以代码如下：</p>
-<pre><code> Runtime.getRuntime().addShutdownHook(new Thread(() -&gt; {
-            log.info(&quot;start stop vertx&quot;);
-            Vertx vertx= SpringContextUtils.getBean(Vertx.class);
-            CountDownLatch countDownLatch=new CountDownLatch(1);
-            vertx.close(res-&gt;{
-                countDownLatch.countDown();
-            });
-            try {
-                countDownLatch.await(30, TimeUnit.SECONDS);
-                log.info(&quot;stop vertx success&quot;);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }));
-</code></pre>
+                alloc_reqs = alloc_reqs_by_rp_uuid[cn_uuid]
+
+                alloc_req = alloc_reqs[0]
+                if utils.claim_resources(elevated, self.placement_client,
+                        spec_obj, instance_uuid, alloc_req,
+                        allocation_request_version=allocation_request_version):
+                    claimed_host = host
+                    break
+
+            if claimed_host is None:
+                LOG.debug(&quot;Unable to successfully claim against any host.&quot;)
+                break
+
+            claimed_instance_uuids.append(instance_uuid)
+            claimed_hosts.append(claimed_host)
+
+            # Now consume the resources so the filter/weights will change for
+            # the next instance.
+            self._consume_selected_host(claimed_host, spec_obj,
+                                        instance_uuid=instance_uuid)</code></pre><p>6.验证claim成功的资源数和要求的数量是否相同，不同则回滚对placement的修改，并抛出novalidhost异常</p>
+<pre><code>self._ensure_sufficient_hosts(context, claimed_hosts, num_instances,
+                claimed_instance_uuids)</code></pre><p>7.返回选中的selection信息集合</p>
+<pre><code>selections_to_return = self._get_alternate_hosts(
+            claimed_hosts, spec_obj, hosts, num, num_alts,
+            alloc_reqs_by_rp_uuid, allocation_request_version)
+        return selections_to_return</code></pre><p>selecttion所包含的字段：</p>
+<pre><code> fields = {
+        &quot;compute_node_uuid&quot;: fields.UUIDField(),
+        &quot;service_host&quot;: fields.StringField(),
+        &quot;nodename&quot;: fields.StringField(),
+        &quot;cell_uuid&quot;: fields.UUIDField(),
+        &quot;limits&quot;: fields.ObjectField(&quot;SchedulerLimits&quot;, nullable=True),
+        # An allocation_request is a non-trivial dict, and so it will be stored
+        # as an encoded string.
+        &quot;allocation_request&quot;: fields.StringField(nullable=True),
+        &quot;allocation_request_version&quot;: fields.StringField(nullable=True),
+    }</code></pre>
             
         </section>
         <footer class="blog-post-page-tags">
         
 			
 				
-			<a href="/tags/CSDN迁移/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">CSDN迁移</a>
+			<a href="/tags/nova/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">nova</a>
 				
 			
 		
@@ -206,12 +243,12 @@ public ResultEntity&lt;Long&gt; sleepOne(String systemNo){
     	
     	
 		
-			<a href="/2019/06/12/整合了阿里巴巴JAVA编码规范的PMD包配合GitLab提升团队代码质量/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="整合了阿里巴巴JAVA编码规范的PMD包配合GitLab提升团队代码质量">上一篇</a>
+			<a href="/2018/09/17/linux学习笔记/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="linux学习笔记">上一篇</a>
 		
 
 		
 		
-			<a href="/2019/05/29/为spring get请求添加自定义的参数处理（如下划线转驼峰）/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="为spring get请求添加自定义的参数处理（如下划线转驼峰）">下一篇</a>
+			<a href="/2018/08/08/layui提示框改造右下通知框（参考svg）/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="layui提示框改造右下通知框（参考svg）">下一篇</a>
 		
 
         <div style="clear: both;"></div>
@@ -314,7 +351,7 @@ public ResultEntity&lt;Long&gt; sleepOne(String systemNo){
                 return out;
             }
             // 生成
-            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://lwydyby.cn/2019/05/30/优雅的关闭vertx/")}).hide();
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("http://lwydyby.cn/2018/08/28/nova-scheduler select-destination源码梳理/")}).hide();
             var canvas=qrcode.find('canvas').get(0);
             $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
         </script>
