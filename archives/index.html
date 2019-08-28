@@ -120,18 +120,21 @@
     
 
     <div class="blog-post-block-padding">
-        <a href="/2019/08/21/CoreDns源码解析/">CoreDns源码分析</a>
+        <a href="/2019/08/28/nova-scheduler select-destination源码梳理/">nova-scheduler select-destination源码梳理</a>
         <section>
             
                 
-                
-首先main方法在coredns.go内，因为这个文件导入了core/plugin.go,而core/plugin.go内导入了所有插件，所以会执行所有插件的init方法,每个插件的init方法功能都一样，就是把自己注册为caddy中名为”dns” 的ser
+                scheduler的调度流程注： 源码可以从~/nava/scheduler/managert.py （select_destinations）开始
+scheduler从接受到rpc调用开始，所经历的流程大概如下图所示：
+
+
+对rpc传过来的request_s
                 ...
             
         </section>
         <footer>
         
-            <time datetime="2019-08-21T02:32:36.000Z"><i class="fa fa-clock-o"></i>2019-08-21</time>
+            <time datetime="2019-08-28T08:35:49.000Z"><i class="fa fa-clock-o"></i>2019-08-28</time>
         
         
         
@@ -152,6 +155,32 @@
                 
                 域名系统（Domain Name System）是整个互联网的电话簿，它能够将可被人理解的域名翻译成可被机器理解 IP 地址，使得互联网的使用者不再需要直接接触很难阅读和理解的 IP 地址。
 域名系统在现在的互联网中非常重要，因为服务器的 IP 地址可能会经常
+                ...
+            
+        </section>
+        <footer>
+        
+            <time datetime="2019-08-21T02:32:36.000Z"><i class="fa fa-clock-o"></i>2019-08-21</time>
+        
+        
+        
+        
+        
+        </footer>
+    </div>
+</article>
+
+
+<article class="blog-post-block">
+    
+
+    <div class="blog-post-block-padding">
+        <a href="/2019/08/21/CoreDns源码解析/">CoreDns源码分析</a>
+        <section>
+            
+                
+                
+首先main方法在coredns.go内，因为这个文件导入了core/plugin.go,而core/plugin.go内导入了所有插件，所以会执行所有插件的init方法,每个插件的init方法功能都一样，就是把自己注册为caddy中名为”dns” 的ser
                 ...
             
         </section>
@@ -341,32 +370,6 @@
         <footer>
         
             <time datetime="2019-04-29T03:35:21.000Z"><i class="fa fa-clock-o"></i>2019-04-29</time>
-        
-        
-        
-        
-        
-        </footer>
-    </div>
-</article>
-
-
-<article class="blog-post-block">
-    
-
-    <div class="blog-post-block-padding">
-        <a href="/2019/04/10/rancher+gitlab+gitlab runner 上传artifacts出现413错误/">rancher+gitlab+gitlab runner 上传artifacts出现413错误</a>
-        <section>
-            
-                
-                   版权声明：本文为博主原创文章，遵循 CC 4.0 by-sa 版权协议，转载请附上原文出处链接和本声明。  本文链接：https://blog.csdn.net/qq_36752632/article/details/89176389   
-  之前改了
-                ...
-            
-        </section>
-        <footer>
-        
-            <time datetime="2019-04-10T02:45:32.000Z"><i class="fa fa-clock-o"></i>2019-04-10</time>
         
         
         
